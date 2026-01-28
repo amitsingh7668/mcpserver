@@ -1,0 +1,10 @@
+Event-Driven:
+- Horizontal scaling: Add more Audit Service instances
+- Handle 1K → 100K messages/sec by adding consumers
+- Kafka/Event Hub handles backpressure automatically
+- Independent scaling of producer/consumer
+
+CDC (Blob Notifications):
+- Limited by blob storage event throughput
+- Harder to control concurrency
+- More prone to throttling
