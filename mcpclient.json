@@ -9,3 +9,18 @@
 	},
 	"inputs": []
 }
+
+#Second
+{
+  "mcpServers": {
+    "my-mcp-server": {
+      "url": "https://my-mcp-server.company.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:MY_MCP_TOKEN}",
+        "x-client-id": "${env:MY_CLIENT_ID}",
+        "x-tenant-id": "${env:MY_TENANT_ID}"
+      }
+    }
+  }
+}
+
