@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -19,477 +18,475 @@
     --code: #1a1a1a;
   }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-background: var(–bg);
-color: var(–text);
-font-family: ‘Literata’, Georgia, serif;
-font-size: 18px;
-line-height: 1.75;
-overflow-x: hidden;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
 
-/* ── HEADER ── */
-header {
-position: relative;
-padding: 80px 0 60px;
-border-bottom: 1px solid var(–border);
-overflow: hidden;
-}
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
 
-.header-grid {
-display: grid;
-grid-template-columns: 1fr 340px;
-gap: 60px;
-max-width: 1100px;
-margin: 0 auto;
-padding: 0 40px;
-align-items: end;
-}
+  .header-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+    align-items: end;
+  }
 
-.eyebrow {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.2em;
-color: var(–accent);
-text-transform: uppercase;
-margin-bottom: 20px;
-display: flex;
-align-items: center;
-gap: 12px;
-}
-.eyebrow::before {
-content: ‘’;
-display: block;
-width: 32px;
-height: 1px;
-background: var(–accent);
-}
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
 
-h1 {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: clamp(60px, 8vw, 100px);
-line-height: 0.9;
-letter-spacing: 0.02em;
-color: #fff;
-margin-bottom: 28px;
-}
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 8vw, 100px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: #fff;
+    margin-bottom: 28px;
+  }
 
-h1 span.red { color: var(–accent); }
-h1 span.yellow { color: var(–accent2); }
+  h1 span.red { color: var(--accent); }
+  h1 span.yellow { color: var(--accent2); }
 
-.subtitle {
-font-size: 20px;
-font-weight: 300;
-color: var(–muted);
-font-style: italic;
-max-width: 520px;
-line-height: 1.5;
-}
+  .subtitle {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 520px;
+    line-height: 1.5;
+  }
 
-.meta {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: var(–muted);
-letter-spacing: 0.1em;
-margin-top: 30px;
-display: flex;
-gap: 24px;
-}
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 30px;
+    display: flex;
+    gap: 24px;
+  }
 
-/* Header right panel */
-.header-stat-card {
-background: var(–surface);
-border: 1px solid var(–border);
-padding: 32px;
-position: relative;
-align-self: center;
-}
-.header-stat-card::before {
-content: ‘’;
-position: absolute;
-top: 0; left: 0;
-width: 4px; height: 100%;
-background: var(–accent);
-}
-.big-stat {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 72px;
-line-height: 1;
-color: var(–accent);
-}
-.stat-label {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.12em;
-color: var(–muted);
-text-transform: uppercase;
-margin-top: 8px;
-}
-.stat-note {
-font-size: 14px;
-color: var(–muted);
-margin-top: 12px;
-font-style: italic;
-}
+  /* Header right panel */
+  .header-stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    position: relative;
+    align-self: center;
+  }
+  .header-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent);
+  }
+  .big-stat {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+  .stat-note {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 12px;
+    font-style: italic;
+  }
 
-/* noise texture overlay */
-header::after {
-content: ‘’;
-position: absolute;
-inset: 0;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.04’/%3E%3C/svg%3E”);
-pointer-events: none;
-opacity: 0.4;
-}
+  /* noise texture overlay */
+  header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
 
-/* ── LAYOUT ── */
-.container {
-max-width: 1100px;
-margin: 0 auto;
-padding: 0 40px;
-}
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
 
-.article-body {
-display: grid;
-grid-template-columns: 1fr 300px;
-gap: 80px;
-padding: 70px 40px;
-max-width: 1100px;
-margin: 0 auto;
-}
+  .article-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 80px;
+    padding: 70px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
-.main-content { min-width: 0; }
+  .main-content { min-width: 0; }
 
-/* ── TYPOGRAPHY ── */
-.lead {
-font-size: 22px;
-font-weight: 300;
-line-height: 1.65;
-color: #c8c0b4;
-margin-bottom: 40px;
-border-left: 3px solid var(–accent2);
-padding-left: 24px;
-}
+  /* ── TYPOGRAPHY ── */
+  .lead {
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1.65;
+    color: #c8c0b4;
+    margin-bottom: 40px;
+    border-left: 3px solid var(--accent2);
+    padding-left: 24px;
+  }
 
-p { margin-bottom: 24px; color: #b8b0a4; }
+  p { margin-bottom: 24px; color: #b8b0a4; }
 
-h2 {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 42px;
-letter-spacing: 0.04em;
-color: #fff;
-margin: 56px 0 20px;
-line-height: 1;
-}
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin: 56px 0 20px;
+    line-height: 1;
+  }
 
-h3 {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 13px;
-letter-spacing: 0.15em;
-text-transform: uppercase;
-color: var(–accent2);
-margin: 36px 0 12px;
-}
+  h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin: 36px 0 12px;
+  }
 
-/* ── PULLQUOTE ── */
-blockquote {
-background: var(–surface);
-border: none;
-margin: 40px 0;
-padding: 32px 36px;
-position: relative;
-}
-blockquote::before {
-content: ‘”’;
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 120px;
-color: var(–accent);
-opacity: 0.2;
-position: absolute;
-top: -10px;
-left: 20px;
-line-height: 1;
-}
-blockquote p {
-font-size: 21px;
-font-style: italic;
-font-weight: 300;
-color: var(–text);
-margin: 0;
-position: relative;
-z-index: 1;
-}
-blockquote cite {
-display: block;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.1em;
-color: var(–muted);
-margin-top: 12px;
-font-style: normal;
-}
+  /* ── PULLQUOTE ── */
+  blockquote {
+    background: var(--surface);
+    border: none;
+    margin: 40px 0;
+    padding: 32px 36px;
+    position: relative;
+  }
+  blockquote::before {
+    content: '"';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    color: var(--accent);
+    opacity: 0.2;
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    line-height: 1;
+  }
+  blockquote p {
+    font-size: 21px;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--text);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+  blockquote cite {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 12px;
+    font-style: normal;
+  }
 
-/* ── CODE INLINE ── */
-code {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 14px;
-background: #1e1e1e;
-color: var(–accent3);
-padding: 2px 7px;
-border-radius: 2px;
-}
+  /* ── CODE INLINE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: #1e1e1e;
+    color: var(--accent3);
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
 
-/* ── CODE BLOCK ── */
-pre {
-background: #111;
-border: 1px solid #2a2a2a;
-padding: 24px;
-overflow-x: auto;
-margin: 32px 0;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 13px;
-line-height: 1.7;
-color: #d4d0c8;
-border-left: 3px solid var(–accent3);
-}
-pre .comment { color: #555; }
-pre .keyword { color: var(–accent3); }
-pre .string { color: var(–accent2); }
-pre .output { color: #6fcc6f; }
+  /* ── CODE BLOCK ── */
+  pre {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    padding: 24px;
+    overflow-x: auto;
+    margin: 32px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #d4d0c8;
+    border-left: 3px solid var(--accent3);
+  }
+  pre .comment { color: #555; }
+  pre .keyword { color: var(--accent3); }
+  pre .string { color: var(--accent2); }
+  pre .output { color: #6fcc6f; }
 
-/* ── STAT CARDS ── */
-.stat-strip {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 1px;
-background: var(–border);
-margin: 48px 0;
-border: 1px solid var(–border);
-}
-.stat-item {
-background: var(–surface);
-padding: 28px 24px;
-text-align: center;
-}
-.stat-item .number {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 52px;
-line-height: 1;
-display: block;
-}
-.stat-item .unit {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.12em;
-color: var(–muted);
-text-transform: uppercase;
-display: block;
-margin-top: 6px;
-}
+  /* ── STAT CARDS ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin: 48px 0;
+    border: 1px solid var(--border);
+  }
+  .stat-item {
+    background: var(--surface);
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .stat-item .number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+    display: block;
+  }
+  .stat-item .unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: block;
+    margin-top: 6px;
+  }
 
-/* ── ATTACK TABLE ── */
-.attack-timeline {
-margin: 40px 0;
-}
-.timeline-item {
-display: grid;
-grid-template-columns: 90px 1fr;
-gap: 24px;
-padding: 20px 0;
-border-bottom: 1px solid var(–border);
-align-items: start;
-}
-.timeline-date {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: var(–accent);
-letter-spacing: 0.1em;
-padding-top: 2px;
-}
-.timeline-title {
-font-weight: 600;
-color: #fff;
-margin-bottom: 4px;
-font-size: 16px;
-}
-.timeline-desc {
-font-size: 14px;
-color: var(–muted);
-margin: 0;
-line-height: 1.5;
-}
-.badge {
-display: inline-block;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.1em;
-padding: 2px 8px;
-margin-left: 8px;
-text-transform: uppercase;
-vertical-align: middle;
-}
-.badge-red { background: rgba(255,60,60,0.15); color: var(–accent); border: 1px solid rgba(255,60,60,0.3); }
-.badge-yellow { background: rgba(255,184,0,0.12); color: var(–accent2); border: 1px solid rgba(255,184,0,0.3); }
-.badge-blue { background: rgba(0,229,255,0.1); color: var(–accent3); border: 1px solid rgba(0,229,255,0.25); }
+  /* ── ATTACK TABLE ── */
+  .attack-timeline {
+    margin: 40px 0;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .timeline-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .timeline-title {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+    font-size: 16px;
+  }
+  .timeline-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .badge-red { background: rgba(255,60,60,0.15); color: var(--accent); border: 1px solid rgba(255,60,60,0.3); }
+  .badge-yellow { background: rgba(255,184,0,0.12); color: var(--accent2); border: 1px solid rgba(255,184,0,0.3); }
+  .badge-blue { background: rgba(0,229,255,0.1); color: var(--accent3); border: 1px solid rgba(0,229,255,0.25); }
 
-/* ── SIDEBAR ── */
-.sidebar { position: sticky; top: 40px; height: fit-content; }
+  /* ── SIDEBAR ── */
+  .sidebar { position: sticky; top: 40px; height: fit-content; }
 
-.sidebar-section {
-border: 1px solid var(–border);
-padding: 28px;
-margin-bottom: 28px;
-background: var(–surface);
-}
-.sidebar-label {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 10px;
-letter-spacing: 0.2em;
-text-transform: uppercase;
-color: var(–muted);
-border-bottom: 1px solid var(–border);
-padding-bottom: 12px;
-margin-bottom: 18px;
-}
-.sidebar ul {
-list-style: none;
-padding: 0;
-}
-.sidebar li {
-font-size: 14px;
-color: #9a9288;
-padding: 7px 0;
-border-bottom: 1px solid #1a1a1a;
-display: flex;
-align-items: flex-start;
-gap: 10px;
-line-height: 1.4;
-margin-bottom: 0;
-}
-.sidebar li::before {
-content: ‘→’;
-color: var(–accent2);
-flex-shrink: 0;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
-margin-top: 1px;
-}
+  .sidebar-section {
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 28px;
+    background: var(--surface);
+  }
+  .sidebar-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  .sidebar li {
+    font-size: 14px;
+    color: #9a9288;
+    padding: 7px 0;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.4;
+    margin-bottom: 0;
+  }
+  .sidebar li::before {
+    content: '→';
+    color: var(--accent2);
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-top: 1px;
+  }
 
-.risk-meter {
-margin-top: 16px;
-}
-.risk-row {
-display: flex;
-align-items: center;
-gap: 12px;
-margin-bottom: 12px;
-}
-.risk-label {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: var(–muted);
-width: 80px;
-flex-shrink: 0;
-}
-.risk-bar-bg {
-flex: 1;
-height: 6px;
-background: #1e1e1e;
-border-radius: 3px;
-overflow: hidden;
-}
-.risk-bar-fill {
-height: 100%;
-border-radius: 3px;
-}
+  .risk-meter {
+    margin-top: 16px;
+  }
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .risk-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .risk-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: #1e1e1e;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .risk-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
 
-/* ── COMPARISON BOX ── */
-.comparison {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 1px;
-background: var(–border);
-margin: 40px 0;
-border: 1px solid var(–border);
-}
-.comp-col {
-background: var(–surface);
-padding: 28px;
-}
-.comp-col-title {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 24px;
-margin-bottom: 16px;
-letter-spacing: 0.05em;
-}
-.comp-col.bad .comp-col-title { color: var(–accent); }
-.comp-col.good .comp-col-title { color: #6fcc6f; }
-.comp-item {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 12px;
-color: var(–muted);
-padding: 7px 0;
-border-bottom: 1px solid #1e1e1e;
-line-height: 1.4;
-margin-bottom: 0;
-}
+  /* ── COMPARISON BOX ── */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    margin: 40px 0;
+    border: 1px solid var(--border);
+  }
+  .comp-col {
+    background: var(--surface);
+    padding: 28px;
+  }
+  .comp-col-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .comp-col.bad .comp-col-title { color: var(--accent); }
+  .comp-col.good .comp-col-title { color: #6fcc6f; }
+  .comp-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 7px 0;
+    border-bottom: 1px solid #1e1e1e;
+    line-height: 1.4;
+    margin-bottom: 0;
+  }
 
-/* ── HIGHLIGHT BOX ── */
-.highlight-box {
-background: linear-gradient(135deg, rgba(255,60,60,0.07), rgba(255,60,60,0.02));
-border: 1px solid rgba(255,60,60,0.2);
-padding: 28px 32px;
-margin: 40px 0;
-}
-.highlight-box .title {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-letter-spacing: 0.15em;
-color: var(–accent);
-text-transform: uppercase;
-margin-bottom: 12px;
-}
-.highlight-box p { color: var(–text); margin: 0; }
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(255,60,60,0.07), rgba(255,60,60,0.02));
+    border: 1px solid rgba(255,60,60,0.2);
+    padding: 28px 32px;
+    margin: 40px 0;
+  }
+  .highlight-box .title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .highlight-box p { color: var(--text); margin: 0; }
 
-/* ── FOOTER ── */
-footer {
-border-top: 1px solid var(–border);
-padding: 40px;
-text-align: center;
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: var(–muted);
-letter-spacing: 0.1em;
-max-width: 1100px;
-margin: 0 auto;
-}
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(20px); }
-to { opacity: 1; transform: translateY(0); }
-}
-header, .stat-strip, .main-content > * {
-animation: fadeUp 0.6s ease both;
-}
-.stat-strip { animation-delay: 0.15s; }
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  header, .stat-strip, .main-content > * {
+    animation: fadeUp 0.6s ease both;
+  }
+  .stat-strip { animation-delay: 0.15s; }
 
-@media (max-width: 768px) {
-.header-grid, .article-body { grid-template-columns: 1fr; }
-.header-stat-card { display: none; }
-.stat-strip { grid-template-columns: 1fr; }
-.comparison { grid-template-columns: 1fr; }
-h1 { font-size: 56px; }
-}
+  @media (max-width: 768px) {
+    .header-grid, .article-body { grid-template-columns: 1fr; }
+    .header-stat-card { display: none; }
+    .stat-strip { grid-template-columns: 1fr; }
+    .comparison { grid-template-columns: 1fr; }
+    h1 { font-size: 56px; }
+  }
 </style>
-
 </head>
 <body>
 
 <!-- ══════════ HEADER ══════════ -->
-
 <header>
   <div class="header-grid">
     <div>
@@ -517,7 +514,6 @@ h1 { font-size: 56px; }
 </header>
 
 <!-- ══════════ BODY ══════════ -->
-
 <div class="article-body">
 <main class="main-content">
 
@@ -534,7 +530,6 @@ h1 { font-size: 56px; }
   </p>
 
   <!-- STATS -->
-
   <div class="stat-strip">
     <div class="stat-item">
       <span class="number" style="color: var(--accent);">3.4M</span>
@@ -556,55 +551,53 @@ h1 { font-size: 56px; }
 
   <div class="attack-timeline">
 
-```
-<div class="timeline-item">
-  <div class="timeline-date">DEC 2024</div>
-  <div>
-    <div class="timeline-title">Ultralytics <span class="badge badge-red">Critical</span></div>
-    <p class="timeline-desc">The popular ML vision library was backdoored via a compromised GitHub Actions cache. Attackers injected malicious code into the build phase and published poisoned versions (8.3.41, 8.3.42, 8.3.45, 8.3.46) using an unrevoked PyPI API token. The package has tens of millions of installs.</p>
-  </div>
-</div>
+    <div class="timeline-item">
+      <div class="timeline-date">DEC 2024</div>
+      <div>
+        <div class="timeline-title">Ultralytics <span class="badge badge-red">Critical</span></div>
+        <p class="timeline-desc">The popular ML vision library was backdoored via a compromised GitHub Actions cache. Attackers injected malicious code into the build phase and published poisoned versions (8.3.41, 8.3.42, 8.3.45, 8.3.46) using an unrevoked PyPI API token. The package has tens of millions of installs.</p>
+      </div>
+    </div>
 
-<div class="timeline-item">
-  <div class="timeline-date">MAR 2025</div>
-  <div>
-    <div class="timeline-title">Cloud Credential Campaign <span class="badge badge-red">Critical</span></div>
-    <p class="timeline-desc">ReversingLabs uncovered 20 malicious packages masquerading as cloud SDKs and time utilities (acloud-client, enumer-iam, snapshot-photo). Combined downloads exceeded 14,100 before detection, all harvesting AWS, Alibaba Cloud, and Tencent Cloud tokens via Base64-encoded payloads in setup.py.</p>
-  </div>
-</div>
+    <div class="timeline-item">
+      <div class="timeline-date">MAR 2025</div>
+      <div>
+        <div class="timeline-title">Cloud Credential Campaign <span class="badge badge-red">Critical</span></div>
+        <p class="timeline-desc">ReversingLabs uncovered 20 malicious packages masquerading as cloud SDKs and time utilities (acloud-client, enumer-iam, snapshot-photo). Combined downloads exceeded 14,100 before detection, all harvesting AWS, Alibaba Cloud, and Tencent Cloud tokens via Base64-encoded payloads in setup.py.</p>
+      </div>
+    </div>
 
-<div class="timeline-item">
-  <div class="timeline-date">MAY 2025</div>
-  <div>
-    <div class="timeline-title">Colorama Typosquatting Campaign <span class="badge badge-yellow">High</span></div>
-    <p class="timeline-desc">Checkmarx Zero discovered a wave of packages mimicking the wildly popular colorama library. Cross-ecosystem name confusion was used — NPM package names repurposed to attack PyPI users. Windows payloads used DLL side-loading for persistence; Linux payloads established encrypted reverse shells via gs-netcat.</p>
-  </div>
-</div>
+    <div class="timeline-item">
+      <div class="timeline-date">MAY 2025</div>
+      <div>
+        <div class="timeline-title">Colorama Typosquatting Campaign <span class="badge badge-yellow">High</span></div>
+        <p class="timeline-desc">Checkmarx Zero discovered a wave of packages mimicking the wildly popular colorama library. Cross-ecosystem name confusion was used — NPM package names repurposed to attack PyPI users. Windows payloads used DLL side-loading for persistence; Linux payloads established encrypted reverse shells via gs-netcat.</p>
+      </div>
+    </div>
 
-<div class="timeline-item">
-  <div class="timeline-date">JUL 2025</div>
-  <div>
-    <div class="timeline-title">termncolor / colorinal <span class="badge badge-yellow">High</span></div>
-    <p class="timeline-desc">A dependency chain attack: the innocent-looking termncolor package pulled in colorinal as a dependency, which executed DLL side-loading, established C2 communication, and enabled remote code execution. Combined downloads: 884. Threat actor had been active since July 10, exchanging 90,692 messages in their Zulip C2 channel.</p>
-  </div>
-</div>
+    <div class="timeline-item">
+      <div class="timeline-date">JUL 2025</div>
+      <div>
+        <div class="timeline-title">termncolor / colorinal <span class="badge badge-yellow">High</span></div>
+        <p class="timeline-desc">A dependency chain attack: the innocent-looking termncolor package pulled in colorinal as a dependency, which executed DLL side-loading, established C2 communication, and enabled remote code execution. Combined downloads: 884. Threat actor had been active since July 10, exchanging 90,692 messages in their Zulip C2 channel.</p>
+      </div>
+    </div>
 
-<div class="timeline-item">
-  <div class="timeline-date">AUG 2025</div>
-  <div>
-    <div class="timeline-title">SilentSync RAT (sisaws, secmeasure) <span class="badge badge-red">Critical</span></div>
-    <p class="timeline-desc">ThreatLabz uncovered two packages delivering a full Python-based Remote Access Trojan capable of remote command execution, file exfiltration, and screen capture. Also harvested credentials, history, autofill data, and cookies from Chrome, Brave, Edge, and Firefox. C2 communication over HTTP with periodic beaconing.</p>
-  </div>
-</div>
+    <div class="timeline-item">
+      <div class="timeline-date">AUG 2025</div>
+      <div>
+        <div class="timeline-title">SilentSync RAT (sisaws, secmeasure) <span class="badge badge-red">Critical</span></div>
+        <p class="timeline-desc">ThreatLabz uncovered two packages delivering a full Python-based Remote Access Trojan capable of remote command execution, file exfiltration, and screen capture. Also harvested credentials, history, autofill data, and cookies from Chrome, Brave, Edge, and Firefox. C2 communication over HTTP with periodic beaconing.</p>
+      </div>
+    </div>
 
-<div class="timeline-item">
-  <div class="timeline-date">MAR 2026</div>
-  <div>
-    <div class="timeline-title">LiteLLM (TeamPCP) <span class="badge badge-red">Critical</span></div>
-    <p class="timeline-desc">The TeamPCP group — previously behind the Trivy vulnerability scanner breach — compromised the LiteLLM project and pushed versions 1.82.7 and 1.82.8. Version 1.82.8 installed a .pth file that executed on every Python startup, even when LiteLLM wasn't in use. The three-stage payload harvested credentials, moved laterally across Kubernetes clusters, and installed a persistent systemd backdoor.</p>
-  </div>
-</div>
-```
+    <div class="timeline-item">
+      <div class="timeline-date">MAR 2026</div>
+      <div>
+        <div class="timeline-title">LiteLLM (TeamPCP) <span class="badge badge-red">Critical</span></div>
+        <p class="timeline-desc">The TeamPCP group — previously behind the Trivy vulnerability scanner breach — compromised the LiteLLM project and pushed versions 1.82.7 and 1.82.8. Version 1.82.8 installed a .pth file that executed on every Python startup, even when LiteLLM wasn't in use. The three-stage payload harvested credentials, moved laterally across Kubernetes clusters, and installed a persistent systemd backdoor.</p>
+      </div>
+    </div>
 
   </div>
 
@@ -736,7 +729,6 @@ pip install litellm
 </main>
 
 <!-- ══════════ SIDEBAR ══════════ -->
-
 <aside class="sidebar">
 
   <div class="sidebar-section">
