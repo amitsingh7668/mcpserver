@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Poisoned Package: How PyPI Became a Battleground</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Literata:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #222;
+    --accent: #ff3c3c;
+    --accent2: #ffb800;
+    --accent3: #00e5ff;
+    --text: #e8e0d4;
+    --muted: #7a7268;
+    --code: #1a1a1a;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Literata’, Georgia, serif;
+font-size: 18px;
+line-height: 1.75;
+overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+position: relative;
+padding: 80px 0 60px;
+border-bottom: 1px solid var(–border);
+overflow: hidden;
+}
+
+.header-grid {
+display: grid;
+grid-template-columns: 1fr 340px;
+gap: 60px;
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 40px;
+align-items: end;
+}
+
+.eyebrow {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.2em;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+.eyebrow::before {
+content: ‘’;
+display: block;
+width: 32px;
+height: 1px;
+background: var(–accent);
+}
+
+h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(60px, 8vw, 100px);
+line-height: 0.9;
+letter-spacing: 0.02em;
+color: #fff;
+margin-bottom: 28px;
+}
+
+h1 span.red { color: var(–accent); }
+h1 span.yellow { color: var(–accent2); }
+
+.subtitle {
+font-size: 20px;
+font-weight: 300;
+color: var(–muted);
+font-style: italic;
+max-width: 520px;
+line-height: 1.5;
+}
+
+.meta {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: var(–muted);
+letter-spacing: 0.1em;
+margin-top: 30px;
+display: flex;
+gap: 24px;
+}
+
+/* Header right panel */
+.header-stat-card {
+background: var(–surface);
+border: 1px solid var(–border);
+padding: 32px;
+position: relative;
+align-self: center;
+}
+.header-stat-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0;
+width: 4px; height: 100%;
+background: var(–accent);
+}
+.big-stat {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 72px;
+line-height: 1;
+color: var(–accent);
+}
+.stat-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.12em;
+color: var(–muted);
+text-transform: uppercase;
+margin-top: 8px;
+}
+.stat-note {
+font-size: 14px;
+color: var(–muted);
+margin-top: 12px;
+font-style: italic;
+}
+
+/* noise texture overlay */
+header::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.04’/%3E%3C/svg%3E”);
+pointer-events: none;
+opacity: 0.4;
+}
+
+/* ── LAYOUT ── */
+.container {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 40px;
+}
+
+.article-body {
+display: grid;
+grid-template-columns: 1fr 300px;
+gap: 80px;
+padding: 70px 40px;
+max-width: 1100px;
+margin: 0 auto;
+}
+
+.main-content { min-width: 0; }
+
+/* ── TYPOGRAPHY ── */
+.lead {
+font-size: 22px;
+font-weight: 300;
+line-height: 1.65;
+color: #c8c0b4;
+margin-bottom: 40px;
+border-left: 3px solid var(–accent2);
+padding-left: 24px;
+}
+
+p { margin-bottom: 24px; color: #b8b0a4; }
+
+h2 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 42px;
+letter-spacing: 0.04em;
+color: #fff;
+margin: 56px 0 20px;
+line-height: 1;
+}
+
+h3 {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–accent2);
+margin: 36px 0 12px;
+}
+
+/* ── PULLQUOTE ── */
+blockquote {
+background: var(–surface);
+border: none;
+margin: 40px 0;
+padding: 32px 36px;
+position: relative;
+}
+blockquote::before {
+content: ‘”’;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 120px;
+color: var(–accent);
+opacity: 0.2;
+position: absolute;
+top: -10px;
+left: 20px;
+line-height: 1;
+}
+blockquote p {
+font-size: 21px;
+font-style: italic;
+font-weight: 300;
+color: var(–text);
+margin: 0;
+position: relative;
+z-index: 1;
+}
+blockquote cite {
+display: block;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.1em;
+color: var(–muted);
+margin-top: 12px;
+font-style: normal;
+}
+
+/* ── CODE INLINE ── */
+code {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 14px;
+background: #1e1e1e;
+color: var(–accent3);
+padding: 2px 7px;
+border-radius: 2px;
+}
+
+/* ── CODE BLOCK ── */
+pre {
+background: #111;
+border: 1px solid #2a2a2a;
+padding: 24px;
+overflow-x: auto;
+margin: 32px 0;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px;
+line-height: 1.7;
+color: #d4d0c8;
+border-left: 3px solid var(–accent3);
+}
+pre .comment { color: #555; }
+pre .keyword { color: var(–accent3); }
+pre .string { color: var(–accent2); }
+pre .output { color: #6fcc6f; }
+
+/* ── STAT CARDS ── */
+.stat-strip {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 1px;
+background: var(–border);
+margin: 48px 0;
+border: 1px solid var(–border);
+}
+.stat-item {
+background: var(–surface);
+padding: 28px 24px;
+text-align: center;
+}
+.stat-item .number {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 52px;
+line-height: 1;
+display: block;
+}
+.stat-item .unit {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.12em;
+color: var(–muted);
+text-transform: uppercase;
+display: block;
+margin-top: 6px;
+}
+
+/* ── ATTACK TABLE ── */
+.attack-timeline {
+margin: 40px 0;
+}
+.timeline-item {
+display: grid;
+grid-template-columns: 90px 1fr;
+gap: 24px;
+padding: 20px 0;
+border-bottom: 1px solid var(–border);
+align-items: start;
+}
+.timeline-date {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: var(–accent);
+letter-spacing: 0.1em;
+padding-top: 2px;
+}
+.timeline-title {
+font-weight: 600;
+color: #fff;
+margin-bottom: 4px;
+font-size: 16px;
+}
+.timeline-desc {
+font-size: 14px;
+color: var(–muted);
+margin: 0;
+line-height: 1.5;
+}
+.badge {
+display: inline-block;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.1em;
+padding: 2px 8px;
+margin-left: 8px;
+text-transform: uppercase;
+vertical-align: middle;
+}
+.badge-red { background: rgba(255,60,60,0.15); color: var(–accent); border: 1px solid rgba(255,60,60,0.3); }
+.badge-yellow { background: rgba(255,184,0,0.12); color: var(–accent2); border: 1px solid rgba(255,184,0,0.3); }
+.badge-blue { background: rgba(0,229,255,0.1); color: var(–accent3); border: 1px solid rgba(0,229,255,0.25); }
+
+/* ── SIDEBAR ── */
+.sidebar { position: sticky; top: 40px; height: fit-content; }
+
+.sidebar-section {
+border: 1px solid var(–border);
+padding: 28px;
+margin-bottom: 28px;
+background: var(–surface);
+}
+.sidebar-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–muted);
+border-bottom: 1px solid var(–border);
+padding-bottom: 12px;
+margin-bottom: 18px;
+}
+.sidebar ul {
+list-style: none;
+padding: 0;
+}
+.sidebar li {
+font-size: 14px;
+color: #9a9288;
+padding: 7px 0;
+border-bottom: 1px solid #1a1a1a;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+line-height: 1.4;
+margin-bottom: 0;
+}
+.sidebar li::before {
+content: ‘→’;
+color: var(–accent2);
+flex-shrink: 0;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 12px;
+margin-top: 1px;
+}
+
+.risk-meter {
+margin-top: 16px;
+}
+.risk-row {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 12px;
+}
+.risk-label {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: var(–muted);
+width: 80px;
+flex-shrink: 0;
+}
+.risk-bar-bg {
+flex: 1;
+height: 6px;
+background: #1e1e1e;
+border-radius: 3px;
+overflow: hidden;
+}
+.risk-bar-fill {
+height: 100%;
+border-radius: 3px;
+}
+
+/* ── COMPARISON BOX ── */
+.comparison {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 1px;
+background: var(–border);
+margin: 40px 0;
+border: 1px solid var(–border);
+}
+.comp-col {
+background: var(–surface);
+padding: 28px;
+}
+.comp-col-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 24px;
+margin-bottom: 16px;
+letter-spacing: 0.05em;
+}
+.comp-col.bad .comp-col-title { color: var(–accent); }
+.comp-col.good .comp-col-title { color: #6fcc6f; }
+.comp-item {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 12px;
+color: var(–muted);
+padding: 7px 0;
+border-bottom: 1px solid #1e1e1e;
+line-height: 1.4;
+margin-bottom: 0;
+}
+
+/* ── HIGHLIGHT BOX ── */
+.highlight-box {
+background: linear-gradient(135deg, rgba(255,60,60,0.07), rgba(255,60,60,0.02));
+border: 1px solid rgba(255,60,60,0.2);
+padding: 28px 32px;
+margin: 40px 0;
+}
+.highlight-box .title {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.15em;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 12px;
+}
+.highlight-box p { color: var(–text); margin: 0; }
+
+/* ── FOOTER ── */
+footer {
+border-top: 1px solid var(–border);
+padding: 40px;
+text-align: center;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: var(–muted);
+letter-spacing: 0.1em;
+max-width: 1100px;
+margin: 0 auto;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+header, .stat-strip, .main-content > * {
+animation: fadeUp 0.6s ease both;
+}
+.stat-strip { animation-delay: 0.15s; }
+
+@media (max-width: 768px) {
+.header-grid, .article-body { grid-template-columns: 1fr; }
+.header-stat-card { display: none; }
+.stat-strip { grid-template-columns: 1fr; }
+.comparison { grid-template-columns: 1fr; }
+h1 { font-size: 56px; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+
+<header>
+  <div class="header-grid">
+    <div>
+      <div class="eyebrow">Security Deep Dive &nbsp;·&nbsp; Supply Chain</div>
+      <h1>
+        THE<br>
+        <span class="red">POISONED</span><br>
+        <span class="yellow">PACKAGE</span>
+      </h1>
+      <p class="subtitle">How PyPI became the most dangerous place on the internet — and why swapping <code>pip</code> for Poetry might save your production stack</p>
+      <div class="meta">
+        <span>APR 2026</span>
+        <span>·</span>
+        <span>12 MIN READ</span>
+        <span>·</span>
+        <span>SECURITY</span>
+      </div>
+    </div>
+    <div class="header-stat-card">
+      <div class="big-stat">95M</div>
+      <div class="stat-label">LiteLLM downloads / month</div>
+      <div class="stat-note">All of them exposed to credential theft during the 2025 TeamPCP breach</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ BODY ══════════ -->
+
+<div class="article-body">
+<main class="main-content">
+
+  <p class="lead">
+    You install a package. You trust the name. You've used it a hundred times. Then, quietly, your SSH keys, cloud tokens, Kubernetes secrets, and <code>.env</code> files travel to a server you've never heard of. This is the new normal in Python.
+  </p>
+
+  <p>
+    The Python ecosystem has spent the last 18 months under siege. What started as scattered typosquatting incidents has evolved into coordinated, multi-stage supply chain campaigns that compromise real packages — packages with millions of weekly downloads — and use them as delivery vehicles for infostealers, RATs, and persistent backdoors.
+  </p>
+
+  <p>
+    The damage is no longer theoretical. The attackers are well-funded, increasingly sophisticated, and they've found a reliable playbook that works across every major package registry. And the first line of defence — <code>pip install</code> — is, by design, almost entirely blind to it.
+  </p>
+
+  <!-- STATS -->
+
+  <div class="stat-strip">
+    <div class="stat-item">
+      <span class="number" style="color: var(--accent);">3.4M</span>
+      <span class="unit">LiteLLM daily downloads at time of breach</span>
+    </div>
+    <div class="stat-item">
+      <span class="number" style="color: var(--accent2);">20</span>
+      <span class="unit">Malicious packages in single 2025 cloud-theft campaign</span>
+    </div>
+    <div class="stat-item">
+      <span class="number" style="color: var(--accent3);">14,100</span>
+      <span class="unit">Downloads before detection in that campaign</span>
+    </div>
+  </div>
+
+  <h2>THE ATTACKS</h2>
+
+  <p>Understanding the threat means walking through the incidents. These weren't theoretical CVEs. They were real packages, used by real engineers, in real production systems.</p>
+
+  <div class="attack-timeline">
+
+```
+<div class="timeline-item">
+  <div class="timeline-date">DEC 2024</div>
+  <div>
+    <div class="timeline-title">Ultralytics <span class="badge badge-red">Critical</span></div>
+    <p class="timeline-desc">The popular ML vision library was backdoored via a compromised GitHub Actions cache. Attackers injected malicious code into the build phase and published poisoned versions (8.3.41, 8.3.42, 8.3.45, 8.3.46) using an unrevoked PyPI API token. The package has tens of millions of installs.</p>
+  </div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-date">MAR 2025</div>
+  <div>
+    <div class="timeline-title">Cloud Credential Campaign <span class="badge badge-red">Critical</span></div>
+    <p class="timeline-desc">ReversingLabs uncovered 20 malicious packages masquerading as cloud SDKs and time utilities (acloud-client, enumer-iam, snapshot-photo). Combined downloads exceeded 14,100 before detection, all harvesting AWS, Alibaba Cloud, and Tencent Cloud tokens via Base64-encoded payloads in setup.py.</p>
+  </div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-date">MAY 2025</div>
+  <div>
+    <div class="timeline-title">Colorama Typosquatting Campaign <span class="badge badge-yellow">High</span></div>
+    <p class="timeline-desc">Checkmarx Zero discovered a wave of packages mimicking the wildly popular colorama library. Cross-ecosystem name confusion was used — NPM package names repurposed to attack PyPI users. Windows payloads used DLL side-loading for persistence; Linux payloads established encrypted reverse shells via gs-netcat.</p>
+  </div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-date">JUL 2025</div>
+  <div>
+    <div class="timeline-title">termncolor / colorinal <span class="badge badge-yellow">High</span></div>
+    <p class="timeline-desc">A dependency chain attack: the innocent-looking termncolor package pulled in colorinal as a dependency, which executed DLL side-loading, established C2 communication, and enabled remote code execution. Combined downloads: 884. Threat actor had been active since July 10, exchanging 90,692 messages in their Zulip C2 channel.</p>
+  </div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-date">AUG 2025</div>
+  <div>
+    <div class="timeline-title">SilentSync RAT (sisaws, secmeasure) <span class="badge badge-red">Critical</span></div>
+    <p class="timeline-desc">ThreatLabz uncovered two packages delivering a full Python-based Remote Access Trojan capable of remote command execution, file exfiltration, and screen capture. Also harvested credentials, history, autofill data, and cookies from Chrome, Brave, Edge, and Firefox. C2 communication over HTTP with periodic beaconing.</p>
+  </div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-date">MAR 2026</div>
+  <div>
+    <div class="timeline-title">LiteLLM (TeamPCP) <span class="badge badge-red">Critical</span></div>
+    <p class="timeline-desc">The TeamPCP group — previously behind the Trivy vulnerability scanner breach — compromised the LiteLLM project and pushed versions 1.82.7 and 1.82.8. Version 1.82.8 installed a .pth file that executed on every Python startup, even when LiteLLM wasn't in use. The three-stage payload harvested credentials, moved laterally across Kubernetes clusters, and installed a persistent systemd backdoor.</p>
+  </div>
+</div>
+```
+
+  </div>
+
+  <blockquote>
+    <p>Lack of moderation and automated security controls in public repositories allow even inexperienced attackers to use them as a platform to spread malware — through typosquatting, dependency confusion, or simple social engineering attacks.</p>
+    <cite>— JFrog Security Research Team</cite>
+  </blockquote>
+
+  <h2>WHY PIP IS FLYING BLIND</h2>
+
+  <p>
+    pip is a fantastic installation tool. It is not a security tool. When you run <code>pip install requests</code>, pip fetches whatever the registry says is the latest version of <code>requests</code>. It does not verify that the version published today is the same code you audited last week. It does not lock transitive dependencies to known-good states. It does not alert you when a package you've been using for two years silently pushed a new version at 3am.
+  </p>
+
+  <p>
+    The LiteLLM attack exploited exactly this: a new version was published, millions of automated CI pipelines pulled it in on next build, and a <code>.pth</code> file was written that ran on every Python startup system-wide. No prompt. No warning. No lockfile check.
+  </p>
+
+  <h3>The Lockfile Gap</h3>
+
+  <p>
+    The absence of a <code>requirements.lock</code> in standard pip-based projects is the single biggest structural vulnerability in the Python ecosystem. A <code>requirements.txt</code> with <code>requests&gt;=2.28.0</code> is an open invitation. The attacker only needs to publish <code>2.28.1</code>.
+  </p>
+
+  <div class="comparison">
+    <div class="comp-col bad">
+      <div class="comp-col-title">pip (Bare)</div>
+      <p class="comp-item">No lockfile by default</p>
+      <p class="comp-item">Resolves "latest compatible" at install time</p>
+      <p class="comp-item">No hash verification of downloaded wheels</p>
+      <p class="comp-item">Transitive deps can update silently</p>
+      <p class="comp-item">No separation of dev vs prod dependencies</p>
+      <p class="comp-item">pip install runs setup.py — arbitrary code execution</p>
+    </div>
+    <div class="comp-col good">
+      <div class="comp-col-title">Poetry</div>
+      <p class="comp-item">poetry.lock pins every dep + transitive dep</p>
+      <p class="comp-item">SHA-256 hash verification on every install</p>
+      <p class="comp-item">Reproducible installs across all environments</p>
+      <p class="comp-item">Explicit dependency groups (dev, test, prod)</p>
+      <p class="comp-item">No silent upgrades — explicit poetry update required</p>
+      <p class="comp-item">Lockfile diffs are reviewable in PRs</p>
+    </div>
+  </div>
+
+  <h2>THE POETRY SOLUTION</h2>
+
+  <p>
+    Poetry doesn't prevent malicious packages from existing on PyPI. What it does is give you a deterministic, auditable, hash-verified snapshot of your entire dependency tree — and it makes any change to that tree explicit and reviewable.
+  </p>
+
+  <p>When you run <code>poetry install</code>, it reads the <code>poetry.lock</code> file and verifies the SHA-256 hash of every wheel before installing it. If the hash doesn't match what was recorded when the lockfile was last generated, the install fails. A compromised package version — pushed after you last ran <code>poetry update</code> — simply cannot sneak in.</p>
+
+  <pre><span class="comment"># The old way — silent, unverified, dangerous</span>
+pip install litellm
+
+<span class="comment"># The Poetry way — pinned, hashed, auditable</span>
+<span class="keyword">poetry</span> <span class="string">add</span> litellm
+<span class="comment"># → Resolves + writes to poetry.lock with SHA-256 hashes
+# → poetry.lock committed to git → changes visible in PRs
+# → Every install: hash verified before extraction</span>
+
+<span class="comment"># If TeamPCP pushes litellm 1.82.7 after your lockfile was written:</span>
+<span class="keyword">poetry</span> <span class="string">install</span>
+<span class="output">✗ Hash mismatch for litellm 1.82.7 — installation aborted</span></pre>
+
+  <p>
+    The second layer of protection is visibility. Your <code>poetry.lock</code> lives in version control. When a dependency genuinely needs updating, the diff shows exactly which packages changed, which versions moved, and what hash was expected vs. what's new. A malicious update is no longer invisible — it's a green line in a PR.
+  </p>
+
+  <h3>Five Commands To Get Hardened</h3>
+
+  <pre><span class="comment"># 1. Initialize Poetry in an existing project</span>
+<span class="keyword">poetry</span> init
+
+<span class="comment"># 2. Migrate your requirements.txt</span>
+<span class="keyword">cat</span> requirements.txt | xargs poetry add
+
+<span class="comment"># 3. Commit the lockfile</span>
+<span class="keyword">git</span> add poetry.lock pyproject.toml && git commit -m "chore: migrate to poetry"
+
+<span class="comment"># 4. Install in CI — always from lockfile, never resolve fresh</span>
+<span class="keyword">poetry</span> install --no-root --only main
+
+<span class="comment"># 5. Audit for known CVEs (complements Poetry)</span>
+<span class="keyword">pip-audit</span> --requirement &lt;(poetry export -f requirements.txt)</pre>
+
+  <h2>THE BIGGER PICTURE</h2>
+
+  <p>
+    It would be a mistake to treat this as a "Python problem". The same month PyPI saw the num2words phishing breach, npm's chalk and debug maintainers were hit by an identical credential-phishing operation. Docker Hub containers were compromised in the same campaign window. The vector differs; the playbook is identical: find a trusted name, compromise a maintainer account, push a poisoned release, wait.
+  </p>
+
+  <div class="highlight-box">
+    <div class="title">⚠ The Transitive Dependency Problem</div>
+    <p>The termncolor attack highlights a specific threat that lockfiles don't fully solve alone: a benign package pulling in a malicious <em>dependency</em>. With Poetry, at minimum, the transitive dependency is also pinned and hashed — so if colorinal's hash changes after your lockfile was generated, you're protected. Without a lockfile, the malicious dep silently resolves on every fresh install.</p>
+  </div>
+
+  <p>
+    The 2025 RL Supply Chain Security Report found that while simple typosquatted packages on PyPI dropped by 85% year-over-year — thanks to improved PyPI moderation — the attacks that remained were dramatically more sophisticated. Attackers shifted from throwing bad packages at the wall to carefully compromising legitimate, trusted projects. Lower volume, higher impact.
+  </p>
+
+  <blockquote>
+    <p>What's unfolding isn't a string of unlucky breaks. It's the same pattern repeating across ecosystems: maintainers get phished, credentials get abused, and malicious code lingers far too long.</p>
+    <cite>— Linux Security, 2025</cite>
+  </blockquote>
+
+  <h2>WHAT TEAMS SHOULD DO NOW</h2>
+
+  <h3>Immediate Actions</h3>
+  <p>
+    Migrate to Poetry (or Pipenv) and commit your lockfile to version control today. Add <code>poetry install --no-root</code> to your CI pipeline. Add <code>pip-audit</code> or Dependabot to scan the lockfile on every PR. Treat any CI pipeline that runs a fresh <code>pip install</code> without a lockfile as a live vulnerability.
+  </p>
+
+  <h3>Structural Hardening</h3>
+  <p>
+    Enable PyPI Trusted Publishing for any packages you maintain — it creates cryptographic provenance attestations that allow PyPI, you, and your users to verify that a release was built from a specific git commit via a specific GitHub Actions workflow. If provenance attestations are absent on a release you didn't manually publish, something is wrong.
+  </p>
+
+  <h3>Runtime Detection</h3>
+  <p>
+    No lockfile prevents zero-day compromises to packages you already depend on. Complement dependency pinning with runtime monitoring: flag unexpected outbound connections initiated post-package-install, monitor for unusual IAM API call patterns (especially <code>AssumeRole</code> spikes), and treat any new <code>.pth</code> file appearing in your Python environment as an incident trigger.
+  </p>
+
+  <p>
+    The trust model that made PyPI and npm the most productive dependency ecosystems in the history of software is also their greatest liability. The answer isn't to abandon open source — it's to stop treating installation as a safe operation and start treating your dependency tree as an attack surface that deserves the same rigor as your own code.
+  </p>
+
+</main>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+
+<aside class="sidebar">
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Attack Vectors (2024–2026)</div>
+    <ul>
+      <li>Typosquatting — misspelled package names</li>
+      <li>Dependency confusion — internal package name hijacking</li>
+      <li>Account compromise — phishing maintainer credentials</li>
+      <li>CI/CD poisoning — GitHub Actions cache injection</li>
+      <li>Transitive dep compromise — malicious indirect deps</li>
+      <li>Combosquatting — cross-ecosystem name reuse</li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">What Gets Stolen</div>
+    <ul>
+      <li>SSH private keys</li>
+      <li>AWS / GCP / Azure credentials</li>
+      <li>Kubernetes secrets & configs</li>
+      <li>.env files (API keys, DB passwords)</li>
+      <li>Browser credentials (Chrome, Firefox, Brave)</li>
+      <li>Crypto wallet seed phrases</li>
+      <li>CI/CD environment variables</li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Risk by Package Trait</div>
+    <div class="risk-meter">
+      <div class="risk-row">
+        <div class="risk-label">No lockfile</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:95%;background:var(--accent)"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label">Low downloads</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:80%;background:var(--accent)"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label">New package</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:75%;background:var(--accent2)"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label">No 2FA</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:70%;background:var(--accent2)"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label">Many deps</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:60%;background:var(--accent2)"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-label">poetry.lock</div>
+        <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:20%;background:#6fcc6f"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Key Numbers</div>
+    <ul>
+      <li>85% drop in simple typosquatted malware on PyPI (2023→2024) — but attacks got smarter</li>
+      <li>14,100+ downloads of cloud-credential-stealing packages before removal</li>
+      <li>95M+ LiteLLM downloads/month — all exposed during TeamPCP breach</li>
+      <li>1,700 downloads of JarkaStealer AI-lure packages across 30+ countries</li>
+      <li>30,000 estimated downloads of a JFrog-detected malicious batch</li>
+    </ul>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  Research compiled from JFrog, Checkmarx Zero, Endor Labs, ReversingLabs, Zscaler ThreatLabz, PyPI Blog, Kaspersky GReAT &nbsp;·&nbsp; April 2026
+</footer>
+
+</body>
+</html>
