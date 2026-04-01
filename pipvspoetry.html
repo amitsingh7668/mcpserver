@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Poisoned Package: How PyPI Became a Battleground</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Literata:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+
   :root {
     --bg: #0d0d0d;
     --surface: #141414;
@@ -20,8 +15,13 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html {
+    background: #0d0d0d !important;
+  }
+
   body {
-    background: var(--bg);
+    background: #0d0d0d !important;
+    background-color: #0d0d0d !important;
     color: var(--text);
     font-family: 'Literata', Georgia, serif;
     font-size: 18px;
@@ -482,10 +482,9 @@
     .comparison { grid-template-columns: 1fr; }
     h1 { font-size: 56px; }
   }
-</style>
-</head>
-<body>
 
+</style>
+<div id="article-root">
 <!-- ══════════ HEADER ══════════ -->
 <header>
   <div class="header-grid">
@@ -803,6 +802,4 @@ pip install litellm
 <footer>
   Research compiled from JFrog, Checkmarx Zero, Endor Labs, ReversingLabs, Zscaler ThreatLabz, PyPI Blog, Kaspersky GReAT &nbsp;·&nbsp; April 2026
 </footer>
-
-</body>
-</html>
+</div>
