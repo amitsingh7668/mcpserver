@@ -1,8 +1,265 @@
-avg by (path) (
-  unwrap duration(
-    {dd=""} 
-    | pod =~ "$pod"
-    | regexp `GET (?P<path>[^ ]+) HTTP/1.1" \d+ [a-zA-Z ]+ (?P<duration>\d+\.?\d*)`
+# Grafana Dashboard — FastAPI Log Queries
+
+**App:** `cmdbReference="AT56277"` · **Namespace:** `at56277-dev-oneplace-wmgt` · **Env:** DEV
+
+-----
+
+## ⚠️ Fix JSONParserErr First
+
+Your logs show `JSONParserErr` because Loki can’t auto-parse Uvicorn’s default log format.  
+Uvicorn access logs look like:
+
+```
+INFO:     127.0.0.1:38597 - "GET /api/health HTTP/1.1" 200 OK
+```
+
+Add this to **every query** to extract fields and suppress parse errors:
+
+```logql
+| pattern `<_> - "<method> <path> <_>" <status> <_>`
+| __error__=""
+```
+
+-----
+
+## Dashboard Variables
+
+Add these under **Dashboard Settings → Variables** before building panels:
+
+|Variable        |Type  |Query                                                   |
+|----------------|------|--------------------------------------------------------|
+|`$pod`          |Query |`label_values({cmdbReference="AT56277"}, pod)`          |
+|`$namespace`    |Query |`label_values({cmdbReference="AT56277"}, namespace)`    |
+|`$env`          |Query |`label_values({cmdbReference="AT56277"}, opEnvironment)`|
+|`$status_filter`|Custom|`2..,4..,5..`                                           |
+
+-----
+
+## Panel 1 — Request Rate
+
+**Type:** Time Series
+
+```logql
+sum(
+  rate(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
     | __error__=""
-  ) [$__range]
+    | pod =~ "$pod"
+    [$__rate_interval]
+  )
 )
+```
+
+**Settings:**
+
+- Unit → `reqps` (requests/sec)
+- Legend → `Request Rate`
+- Fill opacity → `10`
+
+-----
+
+## Panel 2 — Error Rate (4xx / 5xx)
+
+**Type:** Time Series — add both as separate queries on the same panel
+
+```logql
+# Query A — 4xx Client Errors
+sum(
+  rate(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | status =~ "4.."
+    | __error__=""
+    | pod =~ "$pod"
+    [$__rate_interval]
+  )
+)
+
+# Query B — 5xx Server Errors
+sum(
+  rate(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | status =~ "5.."
+    | __error__=""
+    | pod =~ "$pod"
+    [$__rate_interval]
+  )
+)
+```
+
+**Settings:**
+
+- Query A color → Yellow (`#d29922`)
+- Query B color → Red (`#f85149`)
+- Thresholds → `0 = green`, `1 = red`
+
+-----
+
+## Panel 3 — Top Endpoints by Hit Count
+
+**Type:** Bar Chart (horizontal)
+
+```logql
+topk(5,
+  sum by (path) (
+    count_over_time(
+      {cmdbReference="AT56277", container="application"}
+      | pattern `<_> - "<method> <path> <_>" <status> <_>`
+      | __error__=""
+      | pod =~ "$pod"
+      [$__range]
+    )
+  )
+)
+```
+
+**Settings:**
+
+- Orientation → Horizontal
+- Legend → `{{path}}`
+- Color scheme → `palette-classic`
+
+-----
+
+## Panel 4 — p95 Latency per Endpoint
+
+**Type:** Time Series
+
+> Requires your app to log response time. FastAPI + `uvicorn-access` logs it as the last field.  
+> If missing, add `access_log=True` and a custom log format in your app.
+
+```logql
+quantile_over_time(0.95,
+  {cmdbReference="AT56277", container="application"}
+  | pattern `<_> - "<method> <path> <_>" <status> <bytes> <latency>`
+  | __error__=""
+  | pod =~ "$pod"
+  | unwrap latency
+  [$__rate_interval]
+) by (path)
+```
+
+**Settings:**
+
+- Unit → `ms`
+- Legend → `p95 · {{path}}`
+- Thresholds → `0 = green`, `500 = yellow`, `1000 = red`
+
+-----
+
+## Panel 5 — Request Volume by HTTP Method
+
+**Type:** Bar Chart
+
+```logql
+sum by (method) (
+  count_over_time(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | __error__=""
+    | pod =~ "$pod"
+    [$__range]
+  )
+)
+```
+
+**Settings:**
+
+- Legend → `{{method}}`
+- Orientation → Vertical
+
+-----
+
+## Panel 6 — Live Log Stream
+
+**Type:** Logs
+
+```logql
+{cmdbReference="AT56277", container="application"}
+| pattern `<_> - "<method> <path> <_>" <status> <_>`
+| __error__=""
+| pod =~ "$pod"
+| status =~ "$status_filter"
+```
+
+**Settings:**
+
+- Sort order → Descending (newest first)
+- Enable log details → On
+- Wrap lines → Off
+- Deduplication → None
+
+-----
+
+## Stat Panels (Row at top)
+
+### Total Requests (last 30m)
+
+**Type:** Stat
+
+```logql
+sum(
+  count_over_time(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | __error__=""
+    [30m]
+  )
+)
+```
+
+### Error % (last 30m)
+
+**Type:** Stat
+
+```logql
+sum(
+  count_over_time(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | status =~ "[45].."
+    | __error__=""
+    [30m]
+  )
+)
+/
+sum(
+  count_over_time(
+    {cmdbReference="AT56277", container="application"}
+    | pattern `<_> - "<method> <path> <_>" <status> <_>`
+    | __error__=""
+    [30m]
+  )
+) * 100
+```
+
+**Settings:**
+
+- Unit → `percent (0-100)`
+- Thresholds → `0 = green`, `5 = yellow`, `10 = red`
+
+-----
+
+## Recommended Dashboard Layout
+
+```
+[ Total Requests ] [ Error %  ] [ p95 Latency ] [ Active Pods ]
+[         Request Rate (time series)           ]
+[    Error Rate 4xx/5xx (time series)          ]
+[ Top Endpoints (bar) ] [ Method Split (bar)   ]
+[            Live Log Stream                   ]
+```
+
+-----
+
+## Quick Troubleshooting
+
+|Symptom                      |Fix                                                        |
+|-----------------------------|-----------------------------------------------------------|
+|`JSONParserErr` on every log |Add `| pattern \`…``+`| **error**=””`                      |
+|Bar chart shows no data      |Switch `[$__rate_interval]` → `[$__range]` for count panels|
+|p95 latency panel empty      |Check if `<latency>` field exists in your log lines        |
+|`$pod` variable shows nothing|Make sure datasource is Loki, not Prometheus               |
+|Pattern matches nothing      |Test with `| pattern` in Explore tab first                 |
