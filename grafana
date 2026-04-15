@@ -1,0 +1,8 @@
+avg by (path) (
+  unwrap duration(
+    {dd=""} 
+    | pod =~ "$pod"
+    | regexp `GET (?P<path>[^ ]+) HTTP/1.1" \d+ [a-zA-Z ]+ (?P<duration>\d+\.?\d*)`
+    | __error__=""
+  ) [$__range]
+)
