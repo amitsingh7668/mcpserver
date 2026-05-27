@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDLC Agent Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --border: #252932;
+    --border2: #2e3440;
+    --text: #e2e6f0;
+    --muted: #6b7280;
+    --dim: #3d4455;
+    --orch: #6366f1;
+    --orch-dim: rgba(99,102,241,0.12);
+    --orch-glow: rgba(99,102,241,0.3);
+    --gate: #fbbf24;
+    --gate-dim: rgba(251,191,36,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 28px 24px 60px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  .header { text-align: center; margin-bottom: 28px; }
+  .header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--orch);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.5px; }
+  .header p { margin-top: 8px; color: var(--muted); font-size: 13px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    max-width: 960px; margin: 0 auto 24px;
+    display: flex; gap: 4px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 5px;
+  }
+  .tab-btn {
+    flex: 1; padding: 9px 16px;
+    background: transparent; border: none;
+    border-radius: 8px; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.5px; transition: all 0.18s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--bg3); }
+  .tab-btn.active { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+  .tab-icon { font-size: 14px; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ══════════════════════════════════════
+     DIAGRAM TAB
+  ══════════════════════════════════════ */
+  .diagram-wrap {
+    max-width: 960px; margin: 0 auto;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px 20px 24px;
+    overflow-x: auto;
+  }
+
+  /* SVG text classes — match the design system */
+  .diag text { font-family: 'DM Sans', sans-serif; }
+  .diag .th  { font-size: 13px; font-weight: 600; fill: #e2e6f0; }
+  .diag .ts  { font-size: 11px; font-weight: 400; fill: #6b7280; }
+  .diag .tg  { font-size: 10px; font-weight: 500; fill: #3d4455; letter-spacing: 1px; }
+  .diag .tm  { font-size: 10px; font-weight: 400; fill: #4b5563; font-family: 'JetBrains Mono', monospace; }
+
+  /* ══════════════════════════════════════
+     DETAIL TAB — original styles
+  ══════════════════════════════════════ */
+  .flow { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
+
+  .orchestrator {
+    background: var(--bg2); border: 1px solid var(--orch);
+    border-radius: 14px; padding: 20px 24px;
+    box-shadow: 0 0 32px var(--orch-glow), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .orch-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .orch-icon {
+    width: 36px; height: 36px; background: var(--orch-dim);
+    border: 1px solid var(--orch); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .orch-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .orch-sub { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--orch); margin-top: 2px; }
+  .orch-desc { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .orch-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .orch-chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--muted); padding: 3px 9px; border-radius: 20px;
+  }
+
+  .connector { display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
+  .conn-line { width: 1px; height: 20px; background: var(--border2); }
+  .conn-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 1px; padding: 2px 0; }
+
+  .gate {
+    background: var(--gate-dim); border: 1px dashed rgba(251,191,36,0.35);
+    border-radius: 10px; padding: 12px 18px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .gate-icon { font-size: 18px; flex-shrink: 0; }
+  .gate-text { flex: 1; }
+  .gate-title { font-size: 12px; font-weight: 600; color: var(--gate); margin-bottom: 2px; }
+  .gate-desc { font-size: 11px; color: var(--muted); }
+  .gate-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .gate-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 5px 12px; border-radius: 6px; border: 1px solid;
+    cursor: pointer; font-weight: 500; transition: all 0.15s;
+  }
+  .gate-btn.approve { background: rgba(16,185,129,0.12); border-color: #10b981; color: #10b981; }
+  .gate-btn.approve:hover { background: rgba(16,185,129,0.22); }
+  .gate-btn.pause { background: var(--bg3); border-color: var(--border2); color: var(--muted); }
+  .gate-btn.pause:hover { border-color: var(--muted); color: var(--text); }
+
+  .stage {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .stage:hover { border-color: var(--border2); }
+  .stage.active { box-shadow: 0 0 0 1px var(--stage-color), 0 4px 24px rgba(0,0,0,0.4); border-color: var(--stage-color); }
+
+  .stage-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .stage-badge {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; border: 1px solid;
+  }
+  .stage-meta { flex: 1; }
+  .stage-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .stage-role { font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 2px; }
+  .stage-status {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 3px 10px; border-radius: 20px; border: 1px solid;
+  }
+
+  .stage-body { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.2s; }
+  .stage-body.open { max-height: 700px; padding: 16px 20px; }
+
+  .stage-desc { font-size: 12.5px; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+
+  .subagent-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .subagent-label { font-size: 10px; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+  .subagent-pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 10px; border-radius: 20px; border: 1px solid; font-weight: 500; }
+
+  .tools-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 1px; margin-bottom: 8px; }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; margin-bottom: 14px; }
+  .tool-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; display: flex; flex-direction: column; gap: 3px; transition: border-color 0.15s; }
+  .tool-card:hover { border-color: var(--border2); }
+  .tool-name { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500; }
+  .tool-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .tool-source { font-family: 'JetBrains Mono', monospace; font-size: 9px; margin-top: 2px; opacity: 0.55; }
+
+  .output-row { display: flex; align-items: flex-start; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .output-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); padding-top: 1px; flex-shrink: 0; }
+  .output-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .output-chip { font-size: 11px; padding: 2px 9px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border2); color: var(--muted); }
+
+  .legend {
+    max-width: 900px; margin: 32px auto 0;
+    display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+    padding: 14px 18px; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: 10px;
+  }
+  .legend-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 1px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 12px 18px;
+    font-size: 12.5px; color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transform: translateY(80px); opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 100; max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-title { font-weight: 600; margin-bottom: 3px; }
+  .toast-body { color: var(--muted); font-size: 11px; }
+
+  .chevron { color: var(--dim); font-size: 12px; transition: transform 0.25s; flex-shrink: 0; }
+  .stage-header.open .chevron { transform: rotate(180deg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">⬡ Agentic SDLC Pipeline</div>
+  <h1>Orchestrator → Sub-agents → GitLab MCPs</h1>
+  <p>Switch between the Architecture Diagram and the interactive Stage Detail view</p>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('diagram', this)">
+    <span class="tab-icon">⬡</span> Architecture Diagram
+  </button>
+  <button class="tab-btn" onclick="switchTab('detail', this)">
+    <span class="tab-icon">☰</span> Stage Detail &amp; Tools
+  </button>
+</div>
+
+<!-- ══ TAB 1: DIAGRAM ══ -->
+<div id="tab-diagram" class="tab-panel active">
+  <div class="diagram-wrap">
+    <svg class="diag" width="100%" viewBox="0 0 920 1080" role="img">
+      <title>SDLC Agentic Pipeline Architecture</title>
+      <desc>Full flow from VS Code Copilot through Orchestrator Agent to 6 SDLC sub-agents with GitLab MCP servers and approval gates</desc>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="arr-gate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- ─────────────────────────────────────
+           ROW 0 — VS Code Copilot Chat
+      ───────────────────────────────────── -->
+      <!-- box: x=310 w=300 → cx=460 -->
+      <rect x="310" y="24" width="300" height="56" rx="12" fill="#1a1e28" stroke="#6366f1" stroke-width="1.5"/>
+      <text class="th" x="460" y="47" text-anchor="middle" dominant-baseline="central">VS Code Copilot Chat</text>
+      <text class="ts" x="460" y="65" text-anchor="middle" dominant-baseline="central">natural-language SDLC intent</text>
+
+      <!-- MCP client label + arrow down -->
+      <text class="tm" x="472" y="94" dominant-baseline="central" fill="#4b5563">MCP client</text>
+      <line x1="460" y1="80" x2="460" y2="108" stroke="#6366f1" stroke-width="1" marker-end="url(#arr)" opacity="0.6"/>
+
+      <!-- ─────────────────────────────────────
+           ROW 1 — Orchestrator
+      ───────────────────────────────────── -->
+      <!-- outer glow ring -->
+      <rect x="180" y="116" width="560" height="108" rx="14" fill="#13161e" stroke="#6366f1" stroke-width="1.5" filter="none"/>
+      <!-- inner chip: tool registry -->
+      <rect x="196" y="168" width="134" height="44" rx="8" fill="#1a1e28" stroke="#252932" stroke-width="0.5"/>
+      <text class="tm" x="263" y="186" text-anchor="middle" dominant-baseline="central" fill="#6366f1">tool registry</text>
+      <text class="ts" x="263" y="202" text-anchor="middle" dominant-baseline="central">all MCP manifests</text>
+      <!-- inner chip: memory -->
+      <rect x="346" y="168" width="134" height="44" rx="8" fill="#1a1e28" stroke="#252932" stroke-width="0.5"/>
+      <text class="tm" x="413" y="186" text-anchor="middle" dominant-baseline="central" fill="#6366f1">cross-phase memory</text>
+      <text class="ts" x="413" y="202" text-anchor="middle" dominant-baseline="central">issue · branch · pipeline</text>
+      <!-- inner chip: router -->
+      <rect x="496" y="168" width="134" height="44" rx="8" fill="#1a1e28" stroke="#252932" stroke-width="0.5"/>
+      <text class="tm" x="563" y="186" text-anchor="middle" dominant-baseline="central" fill="#6366f1">sub-agent router</text>
+      <text class="ts" x="563" y="202" text-anchor="middle" dominant-baseline="central">dispatch + gate logic</text>
+      <!-- orchestrator label -->
+      <text class="th" x="460" y="148" text-anchor="middle" dominant-baseline="central">Orchestrator Agent</text>
+      <text class="ts" x="460" y="161" text-anchor="middle" dominant-baseline="central" fill="#6366f1">claude-sonnet-4  ·  FastMCP  ·  Streamable HTTP</text>
+
+      <!-- ─────────────────────────────────────
+           Fan lines from orchestrator bottom → 6 stages
+           Orch bottom y=224
+           Stage x-centers: 80,230,380,540,690,840  (width 120 each, gap 10)
+      ───────────────────────────────────── -->
+      <!-- vertical trunk -->
+      <line x1="460" y1="224" x2="460" y2="248" stroke="#2e3440" stroke-width="1"/>
+      <!-- horizontal bus -->
+      <line x1="80" y1="248" x2="840" y2="248" stroke="#2e3440" stroke-width="1"/>
+      <!-- drops -->
+      <line x1="80"  y1="248" x2="80"  y2="266" stroke="#3b82f6" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+      <line x1="230" y1="248" x2="230" y2="266" stroke="#8b5cf6" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+      <line x1="380" y1="248" x2="380" y2="266" stroke="#10b981" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+      <line x1="540" y1="248" x2="540" y2="266" stroke="#f59e0b" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+      <line x1="690" y1="248" x2="690" y2="266" stroke="#ef4444" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+      <line x1="840" y1="248" x2="840" y2="266" stroke="#06b6d4" stroke-width="1" marker-end="url(#arr)" opacity="0.7"/>
+
+      <!-- ─────────────────────────────────────
+           ROW 2 — 6 Sub-agent + MCP blocks
+           Each block: sub-agent card (top) + MCP server card (below)
+           Top of block y=266, subagent h=60, gap 8, mcp h=148
+           Block width=120, spacing: centers at 80,230,380,540,690,840
+      ───────────────────────────────────── -->
+
+      <!-- ── 1. Requirements ── -->
+      <rect x="20" y="266" width="120" height="58" rx="10" fill="#0d1829" stroke="#3b82f6" stroke-width="1"/>
+      <text class="th" x="80" y="289" text-anchor="middle" dominant-baseline="central" fill="#3b82f6">Analyst</text>
+      <text class="ts" x="80" y="307" text-anchor="middle" dominant-baseline="central">Requirements</text>
+      <line x1="80" y1="324" x2="80" y2="340" stroke="#3b82f6" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <!-- MCP server box -->
+      <rect x="20" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#3b82f660" stroke-width="1"/>
+      <text class="tm" x="80" y="358" text-anchor="middle" dominant-baseline="central" fill="#3b82f6">Issues MCP</text>
+      <line x1="30" y1="366" x2="130" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="80" y="380" text-anchor="middle" dominant-baseline="central">create_issue</text>
+      <text class="ts" x="80" y="396" text-anchor="middle" dominant-baseline="central">add_label</text>
+      <text class="ts" x="80" y="412" text-anchor="middle" dominant-baseline="central">set_weight</text>
+      <text class="ts" x="80" y="428" text-anchor="middle" dominant-baseline="central">list_milestones</text>
+      <text class="ts" x="80" y="444" text-anchor="middle" dominant-baseline="central">create_subtasks</text>
+      <text class="ts" x="80" y="460" text-anchor="middle" dominant-baseline="central">get_board_cols</text>
+      <text class="ts" x="80" y="476" text-anchor="middle" dominant-baseline="central">move_issue</text>
+
+      <!-- ── 2. Design ── -->
+      <rect x="170" y="266" width="120" height="58" rx="10" fill="#160f29" stroke="#8b5cf6" stroke-width="1"/>
+      <text class="th" x="230" y="289" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6">Analyst</text>
+      <text class="ts" x="230" y="307" text-anchor="middle" dominant-baseline="central">API Design</text>
+      <line x1="230" y1="324" x2="230" y2="340" stroke="#8b5cf6" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <rect x="170" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#8b5cf660" stroke-width="1"/>
+      <text class="tm" x="230" y="358" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6">Repo + MR MCP</text>
+      <line x1="180" y1="366" x2="280" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="230" y="380" text-anchor="middle" dominant-baseline="central">create_branch</text>
+      <text class="ts" x="230" y="396" text-anchor="middle" dominant-baseline="central">commit_file</text>
+      <text class="ts" x="230" y="412" text-anchor="middle" dominant-baseline="central">create_mr (draft)</text>
+      <text class="ts" x="230" y="428" text-anchor="middle" dominant-baseline="central">add_mr_comment</text>
+      <text class="ts" x="230" y="444" text-anchor="middle" dominant-baseline="central">update_issue</text>
+
+      <!-- ── 3. Code ── -->
+      <rect x="320" y="266" width="120" height="58" rx="10" fill="#0a1f18" stroke="#10b981" stroke-width="1"/>
+      <text class="th" x="380" y="289" text-anchor="middle" dominant-baseline="central" fill="#10b981">Coder</text>
+      <text class="ts" x="380" y="307" text-anchor="middle" dominant-baseline="central">Implementation</text>
+      <line x1="380" y1="324" x2="380" y2="340" stroke="#10b981" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <rect x="320" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#10b98160" stroke-width="1"/>
+      <text class="tm" x="380" y="358" text-anchor="middle" dominant-baseline="central" fill="#10b981">Repo + MR MCP</text>
+      <line x1="330" y1="366" x2="430" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="380" y="380" text-anchor="middle" dominant-baseline="central">create_branch</text>
+      <text class="ts" x="380" y="396" text-anchor="middle" dominant-baseline="central">commit_file</text>
+      <text class="ts" x="380" y="412" text-anchor="middle" dominant-baseline="central">get_file</text>
+      <text class="ts" x="380" y="428" text-anchor="middle" dominant-baseline="central">create_mr</text>
+      <text class="ts" x="380" y="444" text-anchor="middle" dominant-baseline="central">get_mr_diff</text>
+      <text class="ts" x="380" y="460" text-anchor="middle" dominant-baseline="central">add_mr_comment</text>
+      <text class="ts" x="380" y="476" text-anchor="middle" dominant-baseline="central">move_issue</text>
+
+      <!-- ── 4. Test ── -->
+      <rect x="480" y="266" width="120" height="58" rx="10" fill="#1f1700" stroke="#f59e0b" stroke-width="1"/>
+      <text class="th" x="540" y="289" text-anchor="middle" dominant-baseline="central" fill="#f59e0b">Tester</text>
+      <text class="ts" x="540" y="307" text-anchor="middle" dominant-baseline="central">Unit + Playwright</text>
+      <line x1="540" y1="324" x2="540" y2="340" stroke="#f59e0b" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <rect x="480" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#f59e0b60" stroke-width="1"/>
+      <text class="tm" x="540" y="358" text-anchor="middle" dominant-baseline="central" fill="#f59e0b">CI + MR MCP</text>
+      <line x1="490" y1="366" x2="590" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="540" y="380" text-anchor="middle" dominant-baseline="central">commit_file</text>
+      <text class="ts" x="540" y="396" text-anchor="middle" dominant-baseline="central">trigger_pipeline</text>
+      <text class="ts" x="540" y="412" text-anchor="middle" dominant-baseline="central">get_pipeline_status</text>
+      <text class="ts" x="540" y="428" text-anchor="middle" dominant-baseline="central">get_job_log</text>
+      <text class="ts" x="540" y="444" text-anchor="middle" dominant-baseline="central">retry_job</text>
+      <text class="ts" x="540" y="460" text-anchor="middle" dominant-baseline="central">get_mr_diff</text>
+      <text class="ts" x="540" y="476" text-anchor="middle" dominant-baseline="central">add_mr_comment</text>
+
+      <!-- ── 5. Deploy ── -->
+      <rect x="630" y="266" width="120" height="58" rx="10" fill="#1f0a0a" stroke="#ef4444" stroke-width="1"/>
+      <text class="th" x="690" y="289" text-anchor="middle" dominant-baseline="central" fill="#ef4444">DevOps</text>
+      <text class="ts" x="690" y="307" text-anchor="middle" dominant-baseline="central">CI/CD Deploy</text>
+      <line x1="690" y1="324" x2="690" y2="340" stroke="#ef4444" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <rect x="630" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#ef444460" stroke-width="1"/>
+      <text class="tm" x="690" y="358" text-anchor="middle" dominant-baseline="central" fill="#ef4444">CI + Envs MCP</text>
+      <line x1="640" y1="366" x2="740" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="690" y="380" text-anchor="middle" dominant-baseline="central">trigger_pipeline</text>
+      <text class="ts" x="690" y="396" text-anchor="middle" dominant-baseline="central">get_pipeline_status</text>
+      <text class="ts" x="690" y="412" text-anchor="middle" dominant-baseline="central">get_job_log</text>
+      <text class="ts" x="690" y="428" text-anchor="middle" dominant-baseline="central">cancel_pipeline</text>
+      <text class="ts" x="690" y="444" text-anchor="middle" dominant-baseline="central">create_deployment</text>
+      <text class="ts" x="690" y="460" text-anchor="middle" dominant-baseline="central">get_environment</text>
+      <text class="ts" x="690" y="476" text-anchor="middle" dominant-baseline="central">add_mr_comment</text>
+
+      <!-- ── 6. Observe ── -->
+      <rect x="780" y="266" width="120" height="58" rx="10" fill="#011a1f" stroke="#06b6d4" stroke-width="1"/>
+      <text class="th" x="840" y="289" text-anchor="middle" dominant-baseline="central" fill="#06b6d4">Observer</text>
+      <text class="ts" x="840" y="307" text-anchor="middle" dominant-baseline="central">Observability</text>
+      <line x1="840" y1="324" x2="840" y2="340" stroke="#06b6d4" stroke-width="0.8" marker-end="url(#arr)" opacity="0.5"/>
+      <rect x="780" y="340" width="120" height="148" rx="10" fill="#13161e" stroke="#06b6d460" stroke-width="1"/>
+      <text class="tm" x="840" y="358" text-anchor="middle" dominant-baseline="central" fill="#06b6d4">GitLab+Obs MCP</text>
+      <line x1="790" y1="366" x2="890" y2="366" stroke="#252932" stroke-width="0.5"/>
+      <text class="ts" x="840" y="380" text-anchor="middle" dominant-baseline="central">merge_mr</text>
+      <text class="ts" x="840" y="396" text-anchor="middle" dominant-baseline="central">close_issue</text>
+      <text class="ts" x="840" y="412" text-anchor="middle" dominant-baseline="central">create_tag</text>
+      <text class="ts" x="840" y="428" text-anchor="middle" dominant-baseline="central">grafana_metrics</text>
+      <text class="ts" x="840" y="444" text-anchor="middle" dominant-baseline="central">loki_query_logs</text>
+      <text class="ts" x="840" y="460" text-anchor="middle" dominant-baseline="central">add_mr_comment</text>
+
+      <!-- ─────────────────────────────────────
+           APPROVAL GATES between stages
+           Gates sit below MCP boxes (bottom=488) as horizontal bars
+           Connecting vertical lines: stage result → gate → next stage
+           Gate bar y=510, h=32
+      ───────────────────────────────────── -->
+
+      <!-- result lines up from each MCP box bottom (y=488) -->
+      <line x1="80"  y1="488" x2="80"  y2="504" stroke="#3b82f6" stroke-width="0.8" opacity="0.4"/>
+      <line x1="230" y1="488" x2="230" y2="504" stroke="#8b5cf6" stroke-width="0.8" opacity="0.4"/>
+      <line x1="380" y1="488" x2="380" y2="504" stroke="#10b981" stroke-width="0.8" opacity="0.4"/>
+      <line x1="540" y1="488" x2="540" y2="504" stroke="#f59e0b" stroke-width="0.8" opacity="0.4"/>
+      <line x1="690" y1="488" x2="690" y2="504" stroke="#ef4444" stroke-width="0.8" opacity="0.4"/>
+
+      <!-- ── GATES 1-5 as diamond shapes ── -->
+      <!-- Gate centers at x= midpoint between adjacent stage centers -->
+      <!-- Stage cx: 80,230,380,540,690,840 → midpoints: 155,305,460,615,765 -->
+
+      <!-- Gate 1 x=155 -->
+      <polygon points="155,504 175,520 155,536 135,520" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="tg" x="155" y="521" text-anchor="middle" dominant-baseline="central" fill="#fbbf24">G1</text>
+      <!-- Gate 2 x=305 -->
+      <polygon points="305,504 325,520 305,536 285,520" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="tg" x="305" y="521" text-anchor="middle" dominant-baseline="central" fill="#fbbf24">G2</text>
+      <!-- Gate 3 x=460 -->
+      <polygon points="460,504 480,520 460,536 440,520" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="tg" x="460" y="521" text-anchor="middle" dominant-baseline="central" fill="#fbbf24">G3</text>
+      <!-- Gate 4 x=615 -->
+      <polygon points="615,504 635,520 615,536 595,520" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="tg" x="615" y="521" text-anchor="middle" dominant-baseline="central" fill="#fbbf24">G4</text>
+      <!-- Gate 5 x=765 -->
+      <polygon points="765,504 785,520 765,536 745,520" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="tg" x="765" y="521" text-anchor="middle" dominant-baseline="central" fill="#fbbf24">G5</text>
+
+      <!-- horizontal gate bar connecting all diamonds -->
+      <line x1="135" y1="520" x2="745" y2="520" stroke="#fbbf2444" stroke-width="1" stroke-dasharray="4 3"/>
+
+      <!-- Gate labels below diamonds -->
+      <text class="ts" x="155" y="545" text-anchor="middle" dominant-baseline="central" fill="#92700a">Req review</text>
+      <text class="ts" x="305" y="545" text-anchor="middle" dominant-baseline="central" fill="#92700a">Design OK</text>
+      <text class="ts" x="460" y="545" text-anchor="middle" dominant-baseline="central" fill="#92700a">Code review</text>
+      <text class="ts" x="615" y="545" text-anchor="middle" dominant-baseline="central" fill="#92700a">Tests pass</text>
+      <text class="ts" x="765" y="545" text-anchor="middle" dominant-baseline="central" fill="#92700a">Staging OK</text>
+
+      <!-- lines from gates down to next stage input (shown as feedback to orch bus) -->
+      <!-- We show "proceed" arrows going right from each gate to next sub-agent -->
+      <line x1="175" y1="520" x2="212" y2="520" stroke="#fbbf24" stroke-width="0.8" marker-end="url(#arr-gate)" opacity="0.7"/>
+      <line x1="325" y1="520" x2="362" y2="520" stroke="#fbbf24" stroke-width="0.8" marker-end="url(#arr-gate)" opacity="0.7"/>
+      <line x1="480" y1="520" x2="517" y2="520" stroke="#fbbf24" stroke-width="0.8" marker-end="url(#arr-gate)" opacity="0.7"/>
+      <line x1="635" y1="520" x2="672" y2="520" stroke="#fbbf24" stroke-width="0.8" marker-end="url(#arr-gate)" opacity="0.7"/>
+      <line x1="785" y1="520" x2="822" y2="520" stroke="#fbbf24" stroke-width="0.8" marker-end="url(#arr-gate)" opacity="0.7"/>
+
+      <!-- ─────────────────────────────────────
+           ROW 3 — Shared GitLab Infrastructure
+      ───────────────────────────────────── -->
+      <line x1="460" y1="556" x2="460" y2="576" stroke="#2e3440" stroke-width="0.8"/>
+      <rect x="40" y="576" width="840" height="64" rx="12" fill="#13161e" stroke="#252932" stroke-width="1" stroke-dasharray="5 3"/>
+      <text class="tg" x="460" y="596" text-anchor="middle" dominant-baseline="central" fill="#3d4455">SHARED GITLAB INFRASTRUCTURE</text>
+      <text class="ts" x="460" y="616" text-anchor="middle" dominant-baseline="central">GitLab Issues  ·  GitLab Storyboard  ·  GitLab Repo  ·  GitLab MR  ·  GitLab CI/CD  ·  GitLab Environments</text>
+      <text class="ts" x="460" y="632" text-anchor="middle" dominant-baseline="central" fill="#3d4455">All MCPs speak  Streamable HTTP  ·  API-key auth  ·  FastMCP + uvicorn</text>
+
+      <!-- ─────────────────────────────────────
+           ROW 4 — Observability infra
+      ───────────────────────────────────── -->
+      <line x1="460" y1="640" x2="460" y2="660" stroke="#2e3440" stroke-width="0.8"/>
+      <rect x="280" y="660" width="360" height="52" rx="12" fill="#011a1f" stroke="#06b6d433" stroke-width="1" stroke-dasharray="4 3"/>
+      <text class="tg" x="460" y="680" text-anchor="middle" dominant-baseline="central" fill="#06b6d4">OBSERVABILITY STACK</text>
+      <text class="ts" x="460" y="698" text-anchor="middle" dominant-baseline="central">Grafana (metrics)  ·  Loki (logs)  ·  Prometheus</text>
+
+      <!-- ─────────────────────────────────────
+           ROW 5 — Context flow / legend strip
+      ───────────────────────────────────── -->
+      <line x1="460" y1="712" x2="460" y2="732" stroke="#2e3440" stroke-width="0.5" opacity="0.4"/>
+
+      <!-- Sequence flow strip -->
+      <rect x="40" y="732" width="840" height="52" rx="10" fill="#0d0f14" stroke="#1a1e28" stroke-width="1"/>
+      <text class="tg" x="60" y="752" dominant-baseline="central" fill="#3d4455">SEQUENCE</text>
+
+      <!-- sequence pills -->
+      <rect x="140" y="742" width="88" height="24" rx="6" fill="#0d1829" stroke="#3b82f644"/>
+      <text class="ts" x="184" y="755" text-anchor="middle" dominant-baseline="central" fill="#3b82f6">1 · Req</text>
+      <line x1="228" y1="755" x2="242" y2="755" stroke="#2e3440" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="244" y="742" width="88" height="24" rx="6" fill="#160f29" stroke="#8b5cf644"/>
+      <text class="ts" x="288" y="755" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6">2 · Design</text>
+      <line x1="332" y1="755" x2="346" y2="755" stroke="#2e3440" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="348" y="742" width="88" height="24" rx="6" fill="#0a1f18" stroke="#10b98144"/>
+      <text class="ts" x="392" y="755" text-anchor="middle" dominant-baseline="central" fill="#10b981">3 · Code</text>
+      <line x1="436" y1="755" x2="450" y2="755" stroke="#2e3440" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="452" y="742" width="88" height="24" rx="6" fill="#1f1700" stroke="#f59e0b44"/>
+      <text class="ts" x="496" y="755" text-anchor="middle" dominant-baseline="central" fill="#f59e0b">4 · Test</text>
+      <line x1="540" y1="755" x2="554" y2="755" stroke="#2e3440" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="556" y="742" width="88" height="24" rx="6" fill="#1f0a0a" stroke="#ef444444"/>
+      <text class="ts" x="600" y="755" text-anchor="middle" dominant-baseline="central" fill="#ef4444">5 · Deploy</text>
+      <line x1="644" y1="755" x2="658" y2="755" stroke="#2e3440" stroke-width="1" marker-end="url(#arr)"/>
+      <rect x="660" y="742" width="88" height="24" rx="6" fill="#011a1f" stroke="#06b6d444"/>
+      <text class="ts" x="704" y="755" text-anchor="middle" dominant-baseline="central" fill="#06b6d4">6 · Observe</text>
+
+      <!-- gate legend -->
+      <polygon points="800,748 810,755 800,762 790,755" fill="#1a1710" stroke="#fbbf24" stroke-width="1"/>
+      <text class="ts" x="818" y="755" dominant-baseline="central" fill="#fbbf24">= approval gate</text>
+
+      <!-- ─────────────────────────────────────
+           Context feedback arrow (observer → orchestrator)
+      ───────────────────────────────────── -->
+      <path d="M 840 488 Q 910 488 910 168 Q 910 140 740 140" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0.35"/>
+      <text class="ts" x="898" y="330" text-anchor="middle" dominant-baseline="central" fill="#06b6d455" transform="rotate(-90,898,330)">feedback loop</text>
+
+      <!-- Vertical section labels on left margin -->
+      <text class="tg" x="16" y="53"  text-anchor="middle" dominant-baseline="central" transform="rotate(-90,16,53)"  fill="#2e3440">ENTRY</text>
+      <text class="tg" x="16" y="170" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,16,170)" fill="#2e3440">ORCH</text>
+      <text class="tg" x="16" y="415" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,16,415)" fill="#2e3440">AGENTS</text>
+      <text class="tg" x="16" y="520" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,16,520)" fill="#2e3440">GATES</text>
+      <text class="tg" x="16" y="608" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,16,608)" fill="#2e3440">INFRA</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ══ TAB 2: DETAIL ══ -->
+<div id="tab-detail" class="tab-panel">
+  <div class="flow" id="flow"></div>
+  <div class="legend">
+    <span class="legend-title">SUB-AGENTS</span>
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> Orchestrator</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Analyst agent</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Coder agent</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Tester agent</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> DevOps agent</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div> Observer agent</div>
+    <span class="legend-title" style="margin-left:12px">⚡ GATE</span>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;border-radius:2px"></div> Human approval checkpoint</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title"></div>
+  <div class="toast-body" id="toast-body"></div>
+</div>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const STAGES = [
+  {
+    id: 'req', name: 'Requirements & Story Planning', icon: '📋', color: '#3b82f6',
+    subagent: 'Analyst agent', status: 'planning',
+    desc: 'The Analyst agent reads the user intent and translates it into a structured GitLab issue on the storyboard. It decomposes the feature into sub-tasks, writes acceptance criteria, assigns story points, and links the issue to the milestone. All requirement artefacts are created before any code is touched.',
+    tools: [
+      { name: 'gitlab_create_issue', desc: 'Create a new issue on GitLab storyboard with title, description, labels', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_list_milestones', desc: 'Fetch active sprints/milestones to assign the issue correctly', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_add_label', desc: 'Tag issue with phase labels: feature, bug, chore, spike', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_create_subtasks', desc: 'Break epic into child issues with linked parent', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_set_weight', desc: 'Assign story point weight (1–13 Fibonacci)', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_get_board_columns', desc: 'Read board state to validate where issue lands', src: 'GitLab Issues MCP' },
+    ],
+    outputs: ['GitLab issue #', 'Acceptance criteria', 'Story points', 'Milestone link'],
+    gate: { title: 'Gate 1 — Requirements review', desc: 'Confirm the issue scope, acceptance criteria, and story breakdown look correct before design & coding begins.' },
+  },
+  {
+    id: 'design', name: 'API Design & Schema', icon: '🗂', color: '#8b5cf6',
+    subagent: 'Analyst agent', status: 'design',
+    desc: 'Before writing implementation code, the Analyst agent generates API contracts (endpoint signatures, request/response shapes) and any DB schema changes required. These are committed as artefact files (openapi.yaml, migration SQL) on a design branch and linked to the issue.',
+    tools: [
+      { name: 'gitlab_create_branch', desc: 'Open a design branch: design/<issue-id>-<slug>', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_commit_file', desc: 'Commit openapi.yaml, schema.sql, or ADR markdown to repo', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_create_mr', desc: 'Open a Draft MR for design review with issue linked', src: 'GitLab MR MCP' },
+      { name: 'gitlab_add_mr_comment', desc: 'Annotate MR with design rationale per endpoint', src: 'GitLab MR MCP' },
+      { name: 'gitlab_update_issue', desc: 'Attach design artefact links back to the issue', src: 'GitLab Issues MCP' },
+    ],
+    outputs: ['openapi.yaml', 'Schema migration', 'Design draft MR', 'ADR doc'],
+    gate: { title: 'Gate 2 — Design sign-off', desc: 'Review the API contract and DB schema. Approve to let the Coder agent start implementation.' },
+  },
+  {
+    id: 'code', name: 'Implementation', icon: '💻', color: '#10b981',
+    subagent: 'Coder agent', status: 'coding',
+    desc: 'The Coder agent implements the feature on a feature branch, following the approved API contract. It writes application code, wires up routes, adds inline docstrings, and self-reviews the diff before pushing. It opens a Merge Request against main, links it to the GitLab issue, and requests a review from the team.',
+    tools: [
+      { name: 'gitlab_create_branch', desc: 'Create feature/<issue-id>-<slug> from main', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_commit_file', desc: 'Commit implementation files incrementally with meaningful messages', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_get_file', desc: 'Read existing files for context before editing', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_list_commits', desc: 'Verify commit history looks clean before MR', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_create_mr', desc: 'Open MR: title, description, linked issue, assignees, reviewers', src: 'GitLab MR MCP' },
+      { name: 'gitlab_get_mr_diff', desc: 'Read the final diff to self-review before test handoff', src: 'GitLab MR MCP' },
+      { name: 'gitlab_add_mr_comment', desc: 'Leave inline code comments explaining complex logic', src: 'GitLab MR MCP' },
+      { name: 'gitlab_move_issue', desc: 'Move issue from In Progress → Code Review on the board', src: 'GitLab Issues MCP' },
+    ],
+    outputs: ['Feature branch', 'MR opened', 'Issue → In Review', 'Diff for review'],
+    gate: { title: 'Gate 3 — Code review approval', desc: 'The diff is ready. Approve to hand off to the Tester agent for unit + E2E test generation.' },
+  },
+  {
+    id: 'test', name: 'Testing — Unit & E2E', icon: '🧪', color: '#f59e0b',
+    subagent: 'Tester agent', status: 'testing',
+    desc: 'The Tester agent reads the MR diff and acceptance criteria, then writes unit tests (pytest / Jest) and Playwright E2E tests. Tests are committed to the same feature branch. It triggers the GitLab CI test pipeline, tails the job logs, and surfaces pass/fail results. Coverage report is posted as an MR comment.',
+    tools: [
+      { name: 'gitlab_commit_file', desc: 'Commit unit tests and Playwright specs to feature branch', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_get_mr_diff', desc: 'Read implementation diff to understand what to test', src: 'GitLab MR MCP' },
+      { name: 'gitlab_trigger_pipeline', desc: 'Kick off the test stage of the CI pipeline for this branch', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_pipeline_status', desc: 'Poll pipeline status: pending → running → passed/failed', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_job_log', desc: 'Fetch test runner output (pytest stdout, Playwright trace)', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_pipeline_jobs', desc: 'List all jobs in the pipeline to find failed steps', src: 'GitLab CI MCP' },
+      { name: 'gitlab_add_mr_comment', desc: 'Post coverage %, test results summary and Playwright report link', src: 'GitLab MR MCP' },
+      { name: 'gitlab_retry_job', desc: 'Retry flaky test jobs automatically up to 2x', src: 'GitLab CI MCP' },
+    ],
+    outputs: ['Unit tests committed', 'Playwright specs', 'Pipeline result', 'Coverage report'],
+    gate: { title: 'Gate 4 — Test results review', desc: 'All tests passed. Review the coverage report and Playwright trace. Approve to trigger the deployment pipeline.' },
+  },
+  {
+    id: 'deploy', name: 'CI/CD & Deployment', icon: '🚀', color: '#ef4444',
+    subagent: 'DevOps agent', status: 'deploying',
+    desc: 'The DevOps agent triggers the full GitLab CI/CD pipeline — build, containerise, and deploy to staging. It monitors each pipeline stage, checks deployment health (readiness probe, smoke test endpoint), and updates the GitLab environment record. On success it posts the staging URL to the MR.',
+    tools: [
+      { name: 'gitlab_trigger_pipeline', desc: 'Trigger the deploy pipeline on the feature branch or tag', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_pipeline_status', desc: 'Poll all stages: build → docker → deploy → healthcheck', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_job_log', desc: 'Stream build and deploy job logs for real-time visibility', src: 'GitLab CI MCP' },
+      { name: 'gitlab_get_pipeline_jobs', desc: 'Enumerate stages to find which job failed and why', src: 'GitLab CI MCP' },
+      { name: 'gitlab_cancel_pipeline', desc: 'Abort if a critical step fails to save runner minutes', src: 'GitLab CI MCP' },
+      { name: 'gitlab_create_deployment', desc: 'Register the deployment with GitLab environments (staging/prod)', src: 'GitLab Envs MCP' },
+      { name: 'gitlab_get_environment', desc: 'Verify environment URL and current deploy SHA', src: 'GitLab Envs MCP' },
+      { name: 'gitlab_add_mr_comment', desc: 'Post staging URL, deploy SHA, and healthcheck result to MR', src: 'GitLab MR MCP' },
+    ],
+    outputs: ['Build artefact', 'Docker image', 'Staging deployed', 'Env URL on MR'],
+    gate: { title: 'Gate 5 — Staging sign-off', desc: 'Review the staging deployment and smoke test results. Approve to promote to production.' },
+  },
+  {
+    id: 'observe', name: 'Observability & Close-out', icon: '📡', color: '#06b6d4',
+    subagent: 'Observer agent', status: 'observing',
+    desc: 'After production deploy the Observer agent tails Grafana metrics and Loki logs for the new code path. It checks for error rate spikes, latency regressions, and pod restarts. If healthy, it merges the MR, closes the GitLab issue, moves it to Done on the board, and posts a completion summary.',
+    tools: [
+      { name: 'gitlab_merge_mr', desc: 'Merge the feature MR (squash + delete branch)', src: 'GitLab MR MCP' },
+      { name: 'gitlab_close_issue', desc: 'Close and mark the GitLab issue as completed', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_move_issue', desc: 'Move issue to Done column on the storyboard', src: 'GitLab Issues MCP' },
+      { name: 'gitlab_create_tag', desc: 'Tag the release commit with semver for changelog', src: 'GitLab Repo MCP' },
+      { name: 'gitlab_add_mr_comment', desc: 'Post final production health metrics summary', src: 'GitLab MR MCP' },
+      { name: 'grafana_query_metrics', desc: 'Check error rate, p99 latency, request volume post-deploy', src: 'Grafana MCP' },
+      { name: 'loki_query_logs', desc: 'Scan application logs for ERROR/WARN lines in new code path', src: 'Loki MCP' },
+    ],
+    outputs: ['MR merged', 'Issue closed', 'Release tag', 'Health report'],
+    gate: null,
+  },
+];
+
+const flow = document.getElementById('flow');
+
+function showToast(title, body, color) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent = body;
+  t.style.borderColor = color || '#2e3440';
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function renderStage(stage, idx) {
+  const wrapper = document.createElement('div');
+
+  const card = document.createElement('div');
+  card.className = 'stage';
+  card.style.setProperty('--stage-color', stage.color);
+
+  const hdr = document.createElement('div');
+  hdr.className = 'stage-header';
+  hdr.innerHTML = `
+    <div class="stage-badge" style="background:${stage.color}18;border-color:${stage.color}55;color:${stage.color}">${stage.icon}</div>
+    <div class="stage-meta">
+      <div class="stage-name">${stage.name}</div>
+      <div class="stage-role" style="color:${stage.color}">${stage.subagent}</div>
+    </div>
+    <div class="stage-status" style="background:${stage.color}12;border-color:${stage.color}44;color:${stage.color}">${stage.status}</div>
+    <div class="chevron">▼</div>
+  `;
+
+  const body = document.createElement('div');
+  body.className = 'stage-body';
+  const toolCards = stage.tools.map(t => `
+    <div class="tool-card">
+      <div class="tool-name" style="color:${stage.color}">${t.name}()</div>
+      <div class="tool-desc">${t.desc}</div>
+      <div class="tool-source">via ${t.src}</div>
+    </div>`).join('');
+  const outputChips = stage.outputs.map(o => `<span class="output-chip">${o}</span>`).join('');
+  body.innerHTML = `
+    <div class="subagent-row">
+      <span class="subagent-label">SUB-AGENT</span>
+      <span class="subagent-pill" style="color:${stage.color};border-color:${stage.color}55;background:${stage.color}12">${stage.subagent}</span>
+    </div>
+    <div class="stage-desc">${stage.desc}</div>
+    <div class="tools-label">MCP TOOLS (${stage.tools.length})</div>
+    <div class="tools-grid">${toolCards}</div>
+    <div class="output-row">
+      <span class="output-label">OUTPUTS</span>
+      <div class="output-chips">${outputChips}</div>
+    </div>`;
+
+  hdr.addEventListener('click', () => {
+    const isOpen = body.classList.contains('open');
+    flow.querySelectorAll('.stage-body.open').forEach(b => b.classList.remove('open'));
+    flow.querySelectorAll('.stage-header.open').forEach(h => h.classList.remove('open'));
+    flow.querySelectorAll('.stage.active').forEach(s => s.classList.remove('active'));
+    if (!isOpen) { body.classList.add('open'); hdr.classList.add('open'); card.classList.add('active'); }
+  });
+
+  card.appendChild(hdr);
+  card.appendChild(body);
+  wrapper.appendChild(card);
+
+  if (stage.gate) {
+    const gateWrap = document.createElement('div');
+    gateWrap.style.cssText = 'padding: 10px 0;';
+    const gate = document.createElement('div');
+    gate.className = 'gate';
+    gate.innerHTML = `
+      <div class="gate-icon">⚠</div>
+      <div class="gate-text">
+        <div class="gate-title">${stage.gate.title}</div>
+        <div class="gate-desc">${stage.gate.desc}</div>
+      </div>
+      <div class="gate-actions">
+        <button class="gate-btn approve" onclick="handleApprove(${idx})">✓ Proceed</button>
+        <button class="gate-btn pause" onclick="handlePause(${idx})">⏸ Hold</button>
+      </div>`;
+    gateWrap.appendChild(gate);
+    wrapper.appendChild(gateWrap);
+    const conn = document.createElement('div');
+    conn.className = 'connector';
+    conn.innerHTML = `<div class="conn-line"></div>`;
+    wrapper.appendChild(conn);
+  }
+  return wrapper;
+}
+
+function handleApprove(idx) {
+  const nextStage = STAGES[idx + 1];
+  if (nextStage) {
+    showToast(`✓ Proceeding to: ${nextStage.name}`, `${nextStage.subagent} is now active — tools ready.`, nextStage.color);
+    setTimeout(() => {
+      const bodies = flow.querySelectorAll('.stage-body');
+      const headers = flow.querySelectorAll('.stage-header');
+      const cards = flow.querySelectorAll('.stage');
+      bodies.forEach(b => b.classList.remove('open'));
+      headers.forEach(h => h.classList.remove('open'));
+      cards.forEach(c => c.classList.remove('active'));
+      if (bodies[idx + 1]) {
+        bodies[idx + 1].classList.add('open');
+        headers[idx + 1].classList.add('open');
+        cards[idx + 1].classList.add('active');
+        cards[idx + 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 400);
+  }
+}
+
+function handlePause(idx) {
+  showToast(`⏸ Pipeline paused after: ${STAGES[idx].name}`, `Orchestrator is waiting. Resume when ready.`, '#fbbf24');
+}
+
+// Build orchestrator block
+const orchBlock = document.createElement('div');
+orchBlock.style.marginBottom = '0';
+orchBlock.innerHTML = `
+  <div class="orchestrator">
+    <div class="orch-header">
+      <div class="orch-icon">⬡</div>
+      <div>
+        <div class="orch-title">Orchestrator Agent</div>
+        <div class="orch-sub">VS Code Copilot Chat → claude-sonnet-4</div>
+      </div>
+    </div>
+    <div class="orch-desc">
+      Central brain of the SDLC pipeline. Receives natural-language intent from VS Code Copilot,
+      parses it into a task plan, and delegates to the correct sub-agent at each phase.
+      Maintains cross-phase context (issue ID, branch name, pipeline ID, deploy URL).
+      After each phase completes, it presents a human-readable summary and waits for
+      your approval before invoking the next sub-agent.
+    </div>
+    <div class="orch-chips">
+      <span class="orch-chip">intent parsing</span>
+      <span class="orch-chip">tool registry</span>
+      <span class="orch-chip">cross-phase memory</span>
+      <span class="orch-chip">sub-agent dispatch</span>
+      <span class="orch-chip">approval gate logic</span>
+      <span class="orch-chip">error recovery</span>
+    </div>
+  </div>`;
+flow.appendChild(orchBlock);
+
+const firstConn = document.createElement('div');
+firstConn.className = 'connector';
+firstConn.innerHTML = `<div class="conn-line"></div><div class="conn-label">sub-agent dispatch</div><div class="conn-line"></div>`;
+flow.appendChild(firstConn);
+
+STAGES.forEach((stage, idx) => flow.appendChild(renderStage(stage, idx)));
+</script>
+</body>
+</html>
