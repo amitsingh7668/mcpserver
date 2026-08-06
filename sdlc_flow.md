@@ -1,4 +1,4 @@
-# Simplified Orchestrator — Single Process
+# Orchestrator — Single Process
  
 ```mermaid
 flowchart TB
@@ -8,8 +8,10 @@ flowchart TB
     DROP(["🚫 Ignored / No-op"])
     Q[["📦 queue.Queue<br/>in-memory FIFO"]]
     W["⚙️ Worker Thread<br/>one job at a time"]
-    CLI["🤖 Copilot CLI<br/>subprocess.run"]
-    GLR(["🌿 Branch / Commit / MR"])
+    LOAD["📖 Load skill context<br/>Ready · Plan · Build · Test · Deploy · Operate"]
+    WORK["✍️ Run skill work<br/>against issue context"]
+    PUSH["🌿 Push to stage branch<br/><i>stage/issue-&lt;id&gt;</i>"]
+    UPD["💬 Update GitLab issue<br/>comment + stage status"]
     STATE[("💾 State Dict<br/>issue_id → last_label")]
  
     GL ==>|"webhook POST"| WH
@@ -17,9 +19,12 @@ flowchart TB
     RULE -.->|"no"| DROP
     RULE ==>|"yes"| Q
     Q ==>|"dequeue in order"| W
-    W ==>|"spawn"| CLI
-    CLI ==>|"GitLab MCP"| GLR
-    W -.->|"on success"| STATE
+    W ==>|"spawn"| LOAD
+    LOAD ==>|"resolve label → skill"| WORK
+    WORK ==> PUSH
+    PUSH ==> UPD
+    UPD ==>|"GitLab MCP"| GL
+    UPD -.->|"on success"| STATE
     STATE -.->|"checked by"| RULE
  
     classDef trigger fill:#fce8e6,stroke:#d33,stroke-width:2px
@@ -28,17 +33,20 @@ flowchart TB
     classDef store fill:#e6f4ea,stroke:#34a853,stroke-width:2px
     classDef terminal fill:#f1f3f4,stroke:#5f6368,stroke-width:1px,stroke-dasharray: 4 3
  
-    class GL,GLR trigger
-    class WH,W,CLI process
+    class GL trigger
+    class WH,W,LOAD,WORK,PUSH,UPD process
     class RULE decision
     class Q,STATE store
     class DROP terminal
 ```
  
+**What's in the CLI stage now:**
+- **Load skill context** — resolves the current label to its skill config (from `SKILL_MAP`) and loads that skill's context/prompt. One node, six possible skills behind it (Ready, Plan, Build, Test, Deploy, Operate) — which one loads depends on the label, same as your `SKILL_MAP` lookup in code
+- **Push to stage branch** — commits land on a branch named by convention, e.g. `plan/issue-123`, `build/issue-123`, so stages don't clobber each other's work
+- **Update GitLab issue** — CLI posts a comment (what it did, links to branch/MR) and updates the issue via GitLab MCP, closing the loop back to the board
 **Reading the arrows:**
-- **Thick colored arrows (`==>`)** — the main happy-path flow, one event moving through the system
-- **Dotted arrows (`-.->`)** — background/conditional links: the "no" branch, state writes/reads
-- **Colors** group nodes by role: red = external triggers, blue = compute, yellow = decision point, green = storage, gray = dead-end
+- **Thick colored (`==>`)** — the main execution path, one event flowing end to end
+- **Dotted (`-.->`)** — background links: the "no" branch, and state write/read for dedupe
 **Flow:**
 1. Webhook lands, gets parsed into an `IssueEvent`
 2. Checked against `SKILL_MAP` (known label?) and `IssueState` (label actually changed?)
